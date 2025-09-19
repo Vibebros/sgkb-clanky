@@ -1,0 +1,11 @@
+build:
+  script:
+    - echo "lol"
+  tags:
+    - vibebros-shell
+
+deploy:
+  script:
+    - kubectl get pod
+  tags:
+    - vibebros-shell
