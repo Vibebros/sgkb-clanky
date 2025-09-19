@@ -6,3 +6,12 @@ install:
 
 server:
 	cd sgkb && python manage.py runserver
+
+migrations:
+	cd sgkb && python manage.py makemigrations
+
+migrate:
+	cd sgkb && python manage.py migrate
+
+user:
+	cd sgkb && python manage.py createsuperuser
