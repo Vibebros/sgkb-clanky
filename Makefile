@@ -15,3 +15,9 @@ migrate:
 
 user:
 	cd sgkb && python manage.py createsuperuser
+
+redis:
+	docker run -d --name redis -p 127.0.0.1:6379:6379 redis:7-alpine
+
+worker:
+	cd owktp && celery -A owktp worker -B -l info
