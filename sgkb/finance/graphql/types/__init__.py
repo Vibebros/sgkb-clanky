@@ -1,0 +1,1 @@
+from finance.graphql.types.bank_transaction import BankTransactionType
