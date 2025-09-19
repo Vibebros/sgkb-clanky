@@ -8,7 +8,7 @@ class BankTransaction(models.Model):
     customer_name = models.CharField(max_length=255, verbose_name="Customer Name")  # KUNDEN_NAME
 
     trx_id = models.BigIntegerField(verbose_name="Transaction ID")  # TRX_ID
-    trx_type_id = models.IntegerField(verbose_name="Transaction Type ID")  # TRX_TYPE_ID
+    trx_type_id = models.IntegerField(verbose_name="Transaction Type ID", blank=True, null=True)  # TRX_TYPE_ID
     trx_type_short = models.CharField(max_length=50, verbose_name="Transaction Type Short")  # TRX_TYPE_SHORT
     trx_type_name = models.CharField(max_length=100, verbose_name="Transaction Type Name")  # TRX_TYPE_NAME
 
@@ -19,9 +19,9 @@ class BankTransaction(models.Model):
     trx_date = models.DateField(verbose_name="Transaction Date")  # TRX_DATE
 
     direction = models.SmallIntegerField(choices=[(1, "Inflow"), (2, "Outflow")], verbose_name="Direction")  # DIRECTION
-    amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Amount")  # AMOUNT
+    amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Amount", blank=True, null=True)  # AMOUNT
 
-    trx_curry_id = models.IntegerField(verbose_name="Transaction Currency ID")  # TRX_CURRY_ID
+    trx_curry_id = models.IntegerField(verbose_name="Transaction Currency ID", blank=True, null=True)  # TRX_CURRY_ID
     trx_curry_name = models.CharField(max_length=10, verbose_name="Transaction Currency Name")  # TRX_CURRY_NAME
 
     text_short_creditor = models.CharField(max_length=255, blank=True, null=True, verbose_name="Text Short Creditor")  # TEXT_SHORT_CREDITOR
