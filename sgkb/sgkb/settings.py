@@ -37,8 +37,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'finance.apps.FinanceConfig'
+    'finance.apps.FinanceConfig',
+    'graphene_django',
 ]
+
+GRAPHENE = {
+    "SCHEMA": "sgkb.graphql.schema.schema",  # path to schema.py
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
