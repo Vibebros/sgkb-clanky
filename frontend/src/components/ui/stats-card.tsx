@@ -18,7 +18,7 @@ const MONTHLY_QUERY = `
 `;
 
 const currencyFormatter = (number) => {
-  return '$' + Intl.NumberFormat('us').format(number).toString();
+  return 'CHF ' + Intl.NumberFormat('us').format(number).toString();
 };
 
 const numberFormatter = (number) => {
@@ -101,10 +101,10 @@ export default function StatsCard() {
 
   return (
       <Card className="sm:mx-auto sm:max-w-lg">
-        <p className="text-tremor-default text-tremor-content dark:text-dark-tremor-content">
+        <p className="text-tremor-default text-tremor-content dark:text-dark-tremor-content text-xl">
           Expenses by month
         </p>
-        <p className="mt-2 text-tremor-metric font-semibold text-tremor-content-strong dark:text-dark-tremor-content-strong">
+        <p className="mt-2 text-tremor-metric font-semibold text-tremor-content-strong dark:text-dark-tremor-content-strong text-3xl">
           {formattedValue}
         </p>
         <p className="mt-1 flex items-baseline justify-between">

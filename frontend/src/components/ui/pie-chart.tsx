@@ -45,7 +45,7 @@ export const expenseCategories: ExpenseCategory[] = [
 ];
 
 export const currencyFormatter = (value: number) => {
-  return `$${Intl.NumberFormat("us").format(value)}`;
+  return `CHF ${Intl.NumberFormat("us").format(value)}`;
 };
 
 function classNames(...classes: (string | false | null | undefined)[]) {
