@@ -12,8 +12,36 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 
+
+def _load_env_file(base_dir: Path) -> None:
+    """Load key-value pairs from the project-level .env file."""
+
+    env_path = base_dir.parent / ".env"
+    if not env_path.exists():
+        return
+
+    try:
+        contents = env_path.read_text(encoding="utf-8")
+    except OSError:
+        return
+
+    for raw_line in contents.splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+
+        key, sep, value = line.partition("=")
+        if not sep or key in os.environ:
+            continue
+
+        cleaned = value.strip().strip('"').strip("'")
+        os.environ[key] = cleaned
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+_load_env_file(BASE_DIR)
 
 
 # Quick-start development settings - unsuitable for production
