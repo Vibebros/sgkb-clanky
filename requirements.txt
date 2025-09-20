@@ -4,3 +4,4 @@ openpyxl
 graphene-django
 celery[redis]
 redis
+requests

@@ -1,5 +1,11 @@
 from django.db import models
 
+class Logo(models.Model):
+    name = models.CharField(max_length=255, unique=True)  # e.g. "COOP"
+    domain = models.CharField(max_length=255, blank=True, null=True)  # e.g. "coop.ch"
+    url = models.URLField(max_length=255, verbose_name='URL')
+    last_checked_at = models.DateTimeField(auto_now=True)
+
 class BankTransaction(models.Model):
     account_name = models.CharField(max_length=255, verbose_name="Money Account Name")  # MONEY_ACCOUNT_NAME
     currency_type = models.CharField(max_length=10, verbose_name="Currency")  # MAC_CURRY_NAME
@@ -41,6 +47,7 @@ class BankTransaction(models.Model):
     cred_ref_nr = models.CharField(max_length=100, blank=True, null=True, verbose_name="Creditor Reference Number")  # CRED_REF_NR
     cred_info = models.TextField(blank=True, null=True, verbose_name="Creditor Info")  # CRED_INFO
 
+    logo = models.ForeignKey(Logo, verbose_name='URL', blank=True, null=True, on_delete=models.SET_NULL)
     class Meta:
         verbose_name = "Bank Transaction"
         verbose_name_plural = "Bank Transactions"
