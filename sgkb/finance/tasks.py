@@ -4,6 +4,7 @@ import time
 from .utils.logo import search_logo, extract_company_name
 from finance.models import BankTransaction, Logo
 
+
 @shared_task
 def add(x, y):
     time.sleep(5)  # simulate heavy work

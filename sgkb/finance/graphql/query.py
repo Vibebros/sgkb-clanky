@@ -8,10 +8,38 @@ from django.db.models import Sum
 from datetime import timedelta
 
 
+GERMAN_COUNTRY_MAP = {
+    "Schweiz": "CH",
+    "Deutschland": "DE",
+    "Österreich": "AT",
+    "Frankreich": "FR",
+    "Italien": "IT",
+    "Spanien": "ES",
+    "Portugal": "PT",
+    "Niederlande": "NL",
+    "Belgien": "BE",
+    "Luxemburg": "LU",
+    "Grossbritannien": "GB",   # UK
+    "Irland": "IE",
+    "Dänemark": "DK",
+    "Norwegen": "NO",
+    "Schweden": "SE",
+    "Kroatien": "HR",
+    "Vereinigte Staaten": "US",
+    "Kanada": "CA",
+}
+
+
 class MonthlyTotalType(graphene.ObjectType):
     month = graphene.Date()
     total = graphene.Decimal()
     percentage = graphene.Float()
+
+
+class CountryTotalType(graphene.ObjectType):
+    country = graphene.String()
+    total = graphene.Decimal()
+    country_code = graphene.String()
 
 
 class Query(graphene.ObjectType):
@@ -118,3 +146,30 @@ class Query(graphene.ObjectType):
             cred_info=cred_info,
         )
         return qs
+
+    totals_by_country = graphene.List(CountryTotalType)
+
+    def resolve_totals_by_country(self, info):
+        qs = (
+            BankTransaction.objects
+            .values("acquirer_country_name")
+            .annotate(total=Sum("amount"))
+            .order_by("-total")
+        )
+
+        results = []
+        for row in qs:
+            country = row["acquirer_country_name"]
+            if not country:
+                continue
+
+            iso_code = GERMAN_COUNTRY_MAP.get(country)
+
+            results.append(
+                CountryTotalType(
+                    country=country,
+                    country_code=iso_code,
+                    total=row["total"],
+                )
+            )
+        return results

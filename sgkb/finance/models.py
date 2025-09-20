@@ -6,6 +6,11 @@ class Logo(models.Model):
     url = models.URLField(max_length=255, verbose_name='URL')
     last_checked_at = models.DateTimeField(auto_now=True)
 
+
+class Catagory(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+
+
 class BankTransaction(models.Model):
     account_name = models.CharField(max_length=255, verbose_name="Money Account Name")  # MONEY_ACCOUNT_NAME
     currency_type = models.CharField(max_length=10, verbose_name="Currency")  # MAC_CURRY_NAME
@@ -48,6 +53,7 @@ class BankTransaction(models.Model):
     cred_info = models.TextField(blank=True, null=True, verbose_name="Creditor Info")  # CRED_INFO
 
     logo = models.ForeignKey(Logo, verbose_name='URL', blank=True, null=True, on_delete=models.SET_NULL)
+    catagory = models.ForeignKey(Catagory, verbose_name='URL', blank=True, null=True, on_delete=models.SET_NULL)
     class Meta:
         verbose_name = "Bank Transaction"
         verbose_name_plural = "Bank Transactions"
