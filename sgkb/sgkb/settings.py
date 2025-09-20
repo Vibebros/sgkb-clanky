@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'finance.apps.FinanceConfig',
     'graphene_django',
-    'ai_manager.apps.AiManagerConfig'
+    'ai_manager.apps.AiManagerConfig',
+    'corsheaders',
 ]
 
 GRAPHENE = {
@@ -51,12 +52,15 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'sgkb.urls'
 
