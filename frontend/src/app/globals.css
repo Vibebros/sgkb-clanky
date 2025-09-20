@@ -145,3 +145,28 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Fix for Tremor DonutChart empty fill issue */
+.recharts-pie .recharts-sector[fill=""] {
+  fill: currentColor !important;
+}
+
+.recharts-pie .recharts-sector[color="#06b6d4"] {
+  fill: #06b6d4 !important;
+}
+
+.recharts-pie .recharts-sector[color="#3b82f6"] {
+  fill: #3b82f6 !important;
+}
+
+.recharts-pie .recharts-sector[color="#6366f1"] {
+  fill: #6366f1 !important;
+}
+
+.recharts-pie .recharts-sector[color="#8b5cf6"] {
+  fill: #8b5cf6 !important;
+}
+
+.recharts-pie .recharts-sector[color="#d946ef"] {
+  fill: #d946ef !important;
+}
