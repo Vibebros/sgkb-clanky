@@ -1,0 +1,80 @@
+%%{init: { "theme": "base", "themeVariables": {
+  "edgeLabelBackground": "#ffffff",
+  "textColor": "#111827",
+  "fontSize": "14px"
+}}}%%
+
+flowchart TD
+  %% --- Subgraphs ---
+  subgraph Frontend["Frontend (Next.js)"]
+    UI[Dashboard & Transactions Pages]
+  end
+
+  subgraph Backend["Django GraphQL API"]
+    GraphQLView[GraphQLView / Schema]
+    FinanceResolvers[Finance Queries & Filters]
+  end
+
+  subgraph AdminOps["Admin & ETL"]
+    Admin[Admin Site\nCSV Import & Exports]
+  end
+
+  subgraph DataLayer["Data & Services"]
+    DB[(SQLite Database)]
+    Redis[(Redis Broker)]
+    Celery[Celery Worker]
+    LogoDev[logo.dev API]
+  end
+
+  subgraph AILab["AI Manager"]
+    Agent[OpenAI Agent FinanceAssistant]
+    Tools[Tools: get_transactions, detect_recurring_payments]
+  end
+
+  %% --- Edges ---
+  UI -->|GraphQL queries| GraphQLView
+  GraphQLView --> FinanceResolvers
+  FinanceResolvers -->|Django ORM| DB
+
+  Admin -->|CSV upload| DB
+  FinanceResolvers -->|CSV/Excel export| Admin
+
+  GraphQLView -.->|enables GraphQL| UI
+
+  Celery -.->|scheduled/CLI trigger| FinanceResolvers
+  Celery -->|read/update| DB
+  Celery -->|fetch logos| LogoDev
+  Celery <--> Redis
+
+  Agent -->|tool calls| Tools
+  Tools -->|ORM access| DB
+
+  %% --- Subgraph styles ---
+  style Frontend fill:#E3F2FD,stroke:#1E88E5,color:#0D47A1
+  style Backend fill:#E8F5E9,stroke:#43A047,color:#1B5E20
+  style AdminOps fill:#FFF3E0,stroke:#FB8C00,color:#E65100
+  style DataLayer fill:#EDE7F6,stroke:#8E24AA,color:#4A148C
+  style AILab fill:#FCE4EC,stroke:#D81B60,color:#880E4F
+
+  %% --- Node classes ---
+  classDef frontend fill:#E3F2FD,stroke:#1E88E5,color:#0D47A1
+  classDef backend  fill:#E8F5E9,stroke:#43A047,color:#1B5E20
+  classDef admin    fill:#FFF3E0,stroke:#FB8C00,color:#E65100
+  classDef data     fill:#EDE7F6,stroke:#8E24AA,color:#4A148C
+  classDef ai       fill:#FCE4EC,stroke:#D81B60,color:#880E4F
+  classDef db       fill:#FFFDE7,stroke:#FBC02D,color:#5D4037
+  classDef cache    fill:#E0F2F1,stroke:#00897B,color:#004D40
+  classDef worker   fill:#F1F8E9,stroke:#7CB342,color:#33691E
+  classDef ext      fill:#E3F2FD,stroke:#3949AB,color:#1A237E
+
+  class UI frontend
+  class GraphQLView,FinanceResolvers backend
+  class Admin admin
+  class DB db
+  class Redis cache
+  class Celery worker
+  class LogoDev ext
+  class Agent,Tools ai
+
+  %% --- Make ALL edge labels darker & bold for readability ---
+  linkStyle default color:#111827, stroke:#6b7280, font-weight:bold;
