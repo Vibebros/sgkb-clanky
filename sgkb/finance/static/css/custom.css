@@ -1,0 +1,26 @@
+:root {
+  --color-primary: #008751;
+  --color-primary-light: #4dcfa3;
+  --color-primary-dark: #00653c;
+}
+
+/* Utility overrides */
+.bg-primary {
+  background-color: var(--color-primary) !important;
+}
+
+.text-primary {
+  color: var(--color-primary) !important;
+}
+
+.border-primary {
+  border-color: var(--color-primary) !important;
+}
+
+.bg-primary-light {
+  background-color: var(--color-primary-light) !important;
+}
+
+.text-primary-dark {
+  color: var(--color-primary-dark) !important;
+}

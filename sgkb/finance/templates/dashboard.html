@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+{% block banner %}📊 Smart Finance Dashboard{% endblock %}
+
+{% block content %}
+  <!-- Graph -->
+  <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+    <canvas id="financeChart" class="w-full h-48"></canvas>
+  </div>
+
+  <!-- Transactions List -->
+  <div class="bg-white rounded-lg shadow-md p-4">
+    <h2 class="font-bold mb-2">Recent Transactions</h2>
+    <ul>
+      <li class="flex justify-between border-b py-2">
+        <span>Netflix</span>
+        <span>- CHF 15</span>
+      </li>
+      <li class="flex justify-between border-b py-2">
+        <span>Kantine Lunch</span>
+        <span>- CHF 12</span>
+      </li>
+      <li class="flex justify-between border-b py-2">
+        <span>Salary</span>
+        <span>+ CHF 3500</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Chart Script -->
+  <script>
+    const ctx = document.getElementById('financeChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+        datasets: [{
+          label: 'Expenses',
+          data: [500, 700, 400, 600, 750],
+          borderColor: '#008751', // your brand green
+          backgroundColor: 'rgba(0, 135, 81, 0.2)',
+          tension: 0.3
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } }
+      }
+    });
+  </script>
+{% endblock %}
