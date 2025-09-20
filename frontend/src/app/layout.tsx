@@ -1,7 +1,14 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ChatAssistant } from "@/components/chat-assistant";
+import {
+  ExpandableChat,
+  ExpandableChatHeader,
+  ExpandableChatBody,
+  ExpandableChatFooter,
+} from "@/components/ui/expandable-chat";
+import { Button } from "@/components/ui/button";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -123,7 +130,47 @@ export default function RootLayout({
           </nav>
         </div>
         <div className="max-w-screen-md mx-auto relative">
-          <ChatAssistant />
+          <ExpandableChat
+            position="bottom-right"
+            size="md"
+            icon={
+              <img
+                src="/clanky/icon-removed-background.png"
+                alt="Clanky"
+                className="w-8 h-8 object-cover rounded-full"
+              />
+            }
+          >
+            <ExpandableChatHeader className="bg-green-50 border-b border-green-200">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center">
+                  <img
+                    src="/clanky/icon-removed-background.png"
+                    alt="Clanky"
+                    className="w-8 h-8 object-contain"
+                  />
+                </div>
+                <h3 className="text-lg font-semibold text-green-800">
+                  Clanky Assistant
+                </h3>
+              </div>
+            </ExpandableChatHeader>
+            <ExpandableChatBody>
+              <div className="p-4 text-sm text-gray-600">
+                <p>Hello! I'm your AI assistant. How can I help you today?</p>
+              </div>
+            </ExpandableChatBody>
+            <ExpandableChatFooter>
+              <div className="flex gap-2 items-center">
+                <input
+                  type="text"
+                  placeholder="Type your message..."
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <Button size="sm">Send</Button>
+              </div>
+            </ExpandableChatFooter>
+          </ExpandableChat>
         </div>
       </body>
     </html>
