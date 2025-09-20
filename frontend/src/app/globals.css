@@ -6,28 +6,28 @@
 /* Custom green colors for Tremor charts */
 
 @font-face {
-  font-family: 'Frutiger';
-  src: url('/fonts/FrutigerNeueLTPro-Regular.ttf') format('truetype');
+  font-family: "Frutiger";
+  src: url("/fonts/FrutigerNeueLTPro-Regular.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'Frutiger';
-  src: url('/fonts/FrutigerNeueLTPro-Light.ttf') format('truetype');
+  font-family: "Frutiger";
+  src: url("/fonts/FrutigerNeueLTPro-Light.ttf") format("truetype");
   font-weight: 300;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'Frutiger';
-  src: url('/fonts/FrutigerNeueLTPro-Bold.ttf') format('truetype');
+  font-family: "Frutiger";
+  src: url("/fonts/FrutigerNeueLTPro-Bold.ttf") format("truetype");
   font-weight: 700;
   font-style: normal;
 }
 
 body {
-  font-family: 'Frutiger', Arial, Helvetica, sans-serif;
+  font-family: "Frutiger", Arial, Helvetica, sans-serif;
 }
 
 @theme inline {
@@ -169,4 +169,13 @@ body {
 
 .recharts-pie .recharts-sector[color="#d946ef"] {
   fill: #d946ef !important;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
