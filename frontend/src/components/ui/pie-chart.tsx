@@ -11,31 +11,31 @@ const data = [
     name: 'Travel',
     amount: 6730,
     share: '32.1%',
-    color: 'bg-cyan-500',
+    color: 'bg-green-600',
   },
   {
     name: 'IT & equipment',
     amount: 4120,
     share: '19.6%',
-    color: 'bg-blue-500',
+    color: 'bg-green-500',
   },
   {
     name: 'Training & development',
     amount: 3920,
     share: '18.6%',
-    color: 'bg-indigo-500',
+    color: 'bg-green-400',
   },
   {
     name: 'Office supplies',
     amount: 3210,
     share: '15.3%',
-    color: 'bg-violet-500',
+    color: 'bg-green-300',
   },
   {
     name: 'Communication',
     amount: 3010,
     share: '14.3%',
-    color: 'bg-fuchsia-500',
+    color: 'bg-green-200',
   },
 ];
 
@@ -56,8 +56,18 @@ export default function PieChart() {
           category="amount"
           index="name"
           valueFormatter={currencyFormatter}
-          showTooltip={false}
-          colors={['#06b6d4', '#3b82f6', '#6366f1', '#8b5cf6', '#d946ef']}
+          showTooltip={true}
+          customTooltip={(props) => {
+            if (!props.active || !props.payload?.length) return null;
+            const data = props.payload[0];
+            return (
+              <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3">
+                <p className="font-medium text-gray-900">{data.name}</p>
+                <p className="text-gray-600">{currencyFormatter(data.value)}</p>
+              </div>
+            );
+          }}
+          colors={['#628447', '#7ba05b', '#94bc6f', '#add883', '#c6f497']}
         />
         <p className="mt-8 flex items-center justify-between text-tremor-label text-tremor-content dark:text-dark-tremor-content">
           <span>Category</span>
