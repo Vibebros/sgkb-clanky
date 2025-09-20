@@ -131,3 +131,15 @@ make shell
 from ai_manager import utils
 
 Crtl+D
+
+
+
+## Total category
+
+
+query totalCategory{
+  totalsByCategory {
+    category
+    total
+  }
+}

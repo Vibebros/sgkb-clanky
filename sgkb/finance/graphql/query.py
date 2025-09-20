@@ -41,6 +41,10 @@ class CountryTotalType(graphene.ObjectType):
     total = graphene.Decimal()
     country_code = graphene.String()
 
+class CategoryTotalType(graphene.ObjectType):
+    category = graphene.String()
+    total = graphene.Decimal()
+
 
 class Query(graphene.ObjectType):
     bank_transactions = graphene.List(
@@ -170,6 +174,27 @@ class Query(graphene.ObjectType):
                     country=country,
                     country_code=iso_code,
                     total=row["total"],
+                )
+            )
+        return results
+
+    totals_by_category = graphene.List(CategoryTotalType)
+
+    def resolve_totals_by_category(self, info):
+        qs = (
+            BankTransaction.objects
+            .filter(direction=2)  # ✅ only outgoing
+            .values("catagory__name")
+            .annotate(total=Sum("amount"))
+            .order_by("-total")
+        )
+
+        results = []
+        for row in qs:
+            results.append(
+                CategoryTotalType(
+                    category=row["catagory__name"] or "Uncategorized",
+                    total=row["total"] or 0
                 )
             )
         return results
