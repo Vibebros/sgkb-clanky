@@ -131,7 +131,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col items-center min-h-screen pt-8 pb-16">
-      <div className="text-2xl font-bold text-gray-900 text-left w-full px-6 sm:px-12 pb-10">
+      <div className="text-2xl font-bold text-gray-900 text-left w-full px-6 sm:px-12 pb-3">
         Welcome back, John!
       </div>
       <div className="w-full max-w-6xl px-4">
@@ -209,7 +209,7 @@ export default function Home() {
                       <h4 className="text-base font-semibold text-gray-900">
                         Spending by country
                       </h4>
-                      <div className="mt-3 max-h-56 overflow-y-auto pr-1">
+                      <div className="mt-3 max-h-56 overflow-y-auto pr-1 no-scrollbar">
                         <List>
                           {sortedCountryTotals.map((item) => (
                             <ListItem
