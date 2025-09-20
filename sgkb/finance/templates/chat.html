@@ -6,16 +6,31 @@
 {% block banner %}💬 Finance Chatbot{% endblock %}
 
 {% block content %}
-  <h2 class="font-bold mb-4">Ask me about your finances</h2>
-  <form method="post" class="mb-4">
+  <h2 class="font-bold mb-4">Frag den SGKB-Assistenten</h2>
+  <form method="post" class="mb-4 flex flex-col gap-2">
     {% csrf_token %}
-    <input type="text" name="message" class="w-full border p-2 rounded" placeholder="Type your question...">
-    <button type="submit" class="mt-2 w-full bg-blue-600 text-white py-2 rounded">Send</button>
+    <input type="text" name="message" class="w-full border p-2 rounded" placeholder="Stelle deine Frage ...">
+    <button type="submit" class="w-full bg-green-700 text-white py-2 rounded">Senden</button>
   </form>
 
-  {% if response %}
-    <div class="bg-gray-100 p-3 rounded">
-      <p><strong>Bot:</strong> {{ response }}</p>
+  {% if error %}
+    <div class="mb-4 rounded bg-red-100 p-3 text-sm text-red-700">
+      {{ error }}
     </div>
+  {% endif %}
+
+  {% if history %}
+    <div class="flex flex-col gap-3">
+      {% for item in history %}
+        <div class="flex {{ 'justify-end' if item.role == 'user' else 'justify-start' }}">
+          <div class="max-w-xl rounded-lg px-4 py-3 text-sm {{ 'bg-green-600 text-white' if item.role == 'user' else 'bg-gray-100 text-gray-800' }}">
+            <p class="font-semibold mb-1">{{ 'Du' if item.role == 'user' else 'Assistent' }}</p>
+            <p>{{ item.content }}</p>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-sm text-gray-600">Es wurden noch keine Nachrichten ausgetauscht.</p>
   {% endif %}
 {% endblock %}
