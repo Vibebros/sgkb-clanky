@@ -2,3 +2,5 @@ Django
 pandas
 openpyxl
 graphene-django
+celery[redis]
+redis

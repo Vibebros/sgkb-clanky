@@ -20,4 +20,7 @@ redis:
 	docker run -d --name redis -p 127.0.0.1:6379:6379 redis:7-alpine
 
 worker:
-	cd owktp && celery -A owktp worker -B -l info
+	cd sgkb && celery -A sgkb worker -B -l info
+
+shell:
+	cd sgkb && python manage.py shell
