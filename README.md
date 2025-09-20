@@ -122,3 +122,12 @@ print("Count:", TransactionCalculator.count(txs))
 # Min / Max transaction
 print("Min TX:", TransactionCalculator.min_transaction(txs, field="amount"))
 print("Max TX:", TransactionCalculator.max_transaction(txs, field="amount"))
+
+
+##  Test agent
+
+make shell
+
+from ai_manager import utils
+
+Crtl+D

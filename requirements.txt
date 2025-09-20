@@ -5,3 +5,5 @@ graphene-django
 celery[redis]
 redis
 requests
+openai
+openai-agents

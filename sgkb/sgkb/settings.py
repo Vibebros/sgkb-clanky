@@ -148,3 +148,6 @@ CELERY_TIMEZONE = "UTC"
 
 
 LOGO_API_KEY = os.environ.get("LOGO_DEV_API_KEY")
+
+
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")

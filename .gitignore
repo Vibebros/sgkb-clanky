@@ -218,3 +218,5 @@ __marimo__/
 
 celerybeat-schedule-shm
 celerybeat-schedule-wal
+
+db_old.sqlite3

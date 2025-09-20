@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}Dashboard{% endblock %}
-{% block banner %}📊 Finance Dashboard{% endblock %}
+{% block banner %}📊 Smart Finance Dashboard{% endblock %}
 
 {% block content %}
   <!-- Balance Card -->
@@ -10,37 +10,91 @@
     <p class="text-3xl font-bold text-primary">CHF 3,250.00</p>
   </div>
 
-  <!-- Chart Card -->
-  <div class="bg-white rounded-2xl shadow p-4">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="font-bold text-gray-700">Spending by Country</h2>
-      <!-- Filter buttons -->
+  <!-- Controls -->
+  <div class="bg-white rounded-2xl shadow p-4 my-4">
+    <div class="flex justify-between items-center">
+      <!-- Income/Expense Toggle -->
       <div class="space-x-2">
-        <button onclick="renderChart('2025-08-01','2025-08-31')" class="px-3 py-1 bg-primary text-white rounded text-xs">Aug 2025</button>
-        <button onclick="renderChart('2025-07-01','2025-07-31')" class="px-3 py-1 bg-gray-200 rounded text-xs">Jul 2025</button>
+        <button id="btnExpenses" class="px-3 py-1 bg-primary text-white rounded text-xs">Ausgaben</button>
+        <button id="btnIncome" class="px-3 py-1 bg-gray-200 rounded text-xs">Einkommen</button>
+      </div>
+      <!-- Chart Type Toggle -->
+      <div class="space-x-2">
+        <button id="btnPie" class="px-3 py-1 bg-primary text-white rounded text-xs">Pie</button>
+        <button id="btnBar" class="px-3 py-1 bg-gray-200 rounded text-xs">Bar</button>
+        <button id="btnMap" class="px-3 py-1 bg-gray-200 rounded text-xs">Map</button>
       </div>
     </div>
-    <canvas id="financeChart" class="w-full h-64"></canvas>
+    <!-- Month Buttons -->
+    <div id="monthButtons" class="mt-4 flex space-x-2 overflow-x-auto whitespace-nowrap"></div>
   </div>
 
-  <!-- Transactions List -->
-  <div class="bg-white rounded-2xl shadow p-4">
-    <h2 class="font-bold mb-4 text-gray-700">Recent Transactions</h2>
-    <ul id="transactionsList" class="divide-y divide-gray-100 text-sm">
-      <!-- Transactions will be inserted here -->
-    </ul>
+  <!-- Chart Area -->
+  <div id="chartContainer" class="bg-white rounded-2xl shadow p-4">
+    <canvas id="financeChart" class="w-full h-64"></canvas>
+    <div id="mapChart" class="hidden w-full h-96"></div>
+  </div>
+
+  <!-- Transactions Feed -->
+  <div>
+    <h2 class="font-bold my-4 text-gray-700">Recent Transactions</h2>
+    <div id="transactionsList" class="space-y-3">
+      <!-- Transaction cards will be injected here -->
+    </div>
   </div>
 
   <!-- Chart + Data Script -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
   <script>
     const ctx = document.getElementById('financeChart').getContext('2d');
     let chart;
+    let currentDirection = 2; // 2 = Ausgaben, 1 = Einkommen
+    let currentChart = "pie";
+
+    const presetCountries = ["Schweiz", "Deutschland", "Österreich", "Italien", "Kroatien", "Unknown"];
+
+    // Generate month buttons
+    function generateMonthButtons() {
+      const monthButtons = document.getElementById("monthButtons");
+      monthButtons.innerHTML = "";
+
+      const now = new Date();
+      const year = now.getFullYear();
+      const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+      for (let m = 0; m <= now.getMonth(); m++) {
+        const startDate = `${year}-${String(m+1).padStart(2,'0')}-01`;
+        const endDate = new Date(year, m+1, 0);
+        const endDateStr = `${year}-${String(m+1).padStart(2,'0')}-${String(endDate.getDate()).padStart(2,'0')}`;
+
+        const btn = document.createElement("button");
+        btn.textContent = monthNames[m];
+        btn.className = "px-3 py-1 rounded text-xs " +
+          (m === now.getMonth() ? "bg-primary text-white" : "bg-gray-200");
+        btn.onclick = () => {
+          highlightActiveButton(btn);
+          renderChart(startDate, endDateStr);
+        };
+
+        monthButtons.appendChild(btn);
+      }
+    }
+
+    function highlightActiveButton(activeBtn) {
+      document.querySelectorAll("#monthButtons button").forEach(btn => {
+        btn.className = "px-3 py-1 bg-gray-200 rounded text-xs";
+      });
+      activeBtn.className = "px-3 py-1 bg-primary text-white rounded text-xs";
+    }
 
     async function fetchData(startDate, endDate) {
       const query = `
         query {
           bankTransactions(
-            direction: 2
+            startDate: "${startDate}"
+            endDate: "${endDate}"
+            direction: ${currentDirection}
           ) {
             trxDate
             amount
@@ -49,15 +103,12 @@
           }
         }
       `;
-
       const response = await fetch("/graphql/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query })
       });
-
       const result = await response.json();
-      console.log(result)
       return result.data.bankTransactions;
     }
 
@@ -70,18 +121,28 @@
           totals[country] = (totals[country] || 0) + amt;
         }
       });
-      return totals;
+      const grouped = {};
+      presetCountries.forEach(c => {
+        grouped[c] = totals[c] || 0;
+      });
+      return grouped;
     }
 
     function renderTransactions(transactions) {
       const list = document.getElementById("transactionsList");
       list.innerHTML = "";
-      transactions.slice(0, 5).forEach(trx => {
-        const li = document.createElement("li");
-        li.className = "flex justify-between py-3";
+      transactions.slice(0, 10).forEach(trx => {
+        const date = new Date(trx.trxDate).toLocaleDateString("de-CH");
+        const li = document.createElement("div");
+        li.className = "bg-white rounded-2xl shadow p-4 flex justify-between items-center";
         li.innerHTML = `
-          <span>${trx.textShortCreditor || trx.acquirerCountryName || "Unknown"}</span>
-          <span class="text-red-500">- CHF ${trx.amount}</span>
+          <div>
+            <p class="font-medium">${trx.textShortCreditor || "Unknown Merchant"}</p>
+            <p class="text-sm text-gray-500">${date} — ${trx.acquirerCountryName || "Unknown"}</p>
+          </div>
+          <div class="font-bold ${currentDirection === 2 ? 'text-red-500' : 'text-green-600'}">
+            ${currentDirection === 2 ? '-' : '+'} CHF ${trx.amount}
+          </div>
         `;
         list.appendChild(li);
       });
@@ -90,33 +151,72 @@
     async function renderChart(startDate, endDate) {
       const transactions = await fetchData(startDate, endDate);
       const grouped = groupByCountry(transactions);
-
       const labels = Object.keys(grouped);
       const values = Object.values(grouped);
 
       if (chart) chart.destroy();
-      chart = new Chart(ctx, {
-        type: "pie",
-        data: {
-          labels: labels,
-          datasets: [{
-            data: values,
-            backgroundColor: [
-              "#008751",
-              "#4dcfa3",
-              "#00653c",
-              "#9ae6b4",
-              "#e2e8f0"
-            ]
-          }]
-        },
-        options: { responsive: true }
-      });
+
+      if (currentChart === "pie") {
+        chart = new Chart(ctx, {
+          type: "pie",
+          data: { labels, datasets: [{ data: values, backgroundColor: ["#008751","#4dcfa3","#00653c","#9ae6b4","#e2e8f0","#cbd5e1"] }] },
+          options: { responsive: true }
+        });
+        document.getElementById("financeChart").classList.remove("hidden");
+        document.getElementById("mapChart").classList.add("hidden");
+      }
+
+      if (currentChart === "bar") {
+        chart = new Chart(ctx, {
+          type: "bar",
+          data: { labels, datasets: [{ data: values, backgroundColor: "#008751" }] },
+          options: { responsive: true }
+        });
+        document.getElementById("financeChart").classList.remove("hidden");
+        document.getElementById("mapChart").classList.add("hidden");
+      }
+
+      if (currentChart === "map") {
+        document.getElementById("financeChart").classList.add("hidden");
+        document.getElementById("mapChart").classList.remove("hidden");
+        renderMap(grouped);
+      }
 
       renderTransactions(transactions);
     }
 
-    // Load default chart for current month
-    renderChart("2025-08-01", "2025-08-31");
+    // Google GeoChart for world heatmap
+    google.charts.load('current', { packages:['geochart'] });
+    function renderMap(grouped) {
+      const dataArray = [['Country', 'Amount']];
+      for (const [country, value] of Object.entries(grouped)) {
+        dataArray.push([country, value]);
+      }
+      const data = google.visualization.arrayToDataTable(dataArray);
+      const options = { colorAxis: {colors: ['#e2e8f0', '#008751']} };
+      const geoChart = new google.visualization.GeoChart(document.getElementById('mapChart'));
+      geoChart.draw(data, options);
+    }
+
+    // Button listeners
+    document.getElementById("btnExpenses").onclick = () => {
+      currentDirection = 2;
+      renderChart(startOfMonth, endOfMonthStr);
+    };
+    document.getElementById("btnIncome").onclick = () => {
+      currentDirection = 1;
+      renderChart(startOfMonth, endOfMonthStr);
+    };
+    document.getElementById("btnPie").onclick = () => { currentChart = "pie"; renderChart(startOfMonth, endOfMonthStr); };
+    document.getElementById("btnBar").onclick = () => { currentChart = "bar"; renderChart(startOfMonth, endOfMonthStr); };
+    document.getElementById("btnMap").onclick = () => { currentChart = "map"; renderChart(startOfMonth, endOfMonthStr); };
+
+    // Init
+    generateMonthButtons();
+    const now = new Date();
+    const startOfMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const endOfMonthStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(endOfMonth.getDate()).padStart(2,'0')}`;
+    renderChart(startOfMonth, endOfMonthStr);
   </script>
 {% endblock %}
