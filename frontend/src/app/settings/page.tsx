@@ -60,13 +60,15 @@ function ToggleSwitch({ enabled, onChange, label }: ToggleSwitchProps) {
   return (
     <button
       type="button"
-      onClick={() => onChange(!enabled)}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${enabled ? "bg-green-600" : "bg-gray-300"}`}
-      aria-pressed={enabled}
+      role="switch"
+      aria-checked={enabled}
       aria-label={label}
+      onClick={() => onChange(!enabled)}
+      className={`relative inline-flex h-6 w-11 min-w-[2.75rem] flex-shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${enabled ? "bg-green-600" : "bg-gray-300"}`}
     >
       <span
-        className={`inline-block h-5 w-5 transform rounded-full bg-white transition ${enabled ? "translate-x-5" : "translate-x-1"}`}
+        aria-hidden="true"
+        className={`pointer-events-none absolute left-0.5 top-1/2 inline-block h-5 w-5 rounded-full bg-white shadow transition duration-200 ease-in-out ${enabled ? "translate-x-5 -translate-y-1/2" : "translate-x-0 -translate-y-1/2"}`}
       />
     </button>
   );
