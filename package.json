@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "react-simple-maps": "^3.0.0",
+    "react-svg-worldmap": "^2.0.0-alpha.16"
+  }
+}
