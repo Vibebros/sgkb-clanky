@@ -2,6 +2,17 @@ import graphene
 from .types import BankTransactionType
 from finance.models import BankTransaction
 from finance.utils import TransactionFilter
+from django.utils.timezone import now
+from django.db.models.functions import TruncMonth
+from django.db.models import Sum
+from datetime import timedelta
+
+
+class MonthlyTotalType(graphene.ObjectType):
+    month = graphene.Date()
+    total = graphene.Decimal()
+    percentage = graphene.Float()
+
 
 class Query(graphene.ObjectType):
     bank_transactions = graphene.List(
@@ -27,6 +38,36 @@ class Query(graphene.ObjectType):
         cred_ref_nr=graphene.String(),
         cred_info=graphene.String(),
     )
+
+
+    monthly_totals = graphene.List(MonthlyTotalType)
+
+    def resolve_monthly_totals(self, info):
+        twelve_months_ago = now().date().replace(day=1) - timedelta(days=365)
+
+        qs = (
+            BankTransaction.objects
+            .filter(val_date__gte=twelve_months_ago)
+            .annotate(month=TruncMonth("val_date"))
+            .values("month")
+            .annotate(total=Sum("amount"))
+            .order_by("month")
+        )
+
+        total_sum = sum(row["total"] or 0 for row in qs)
+
+        results = []
+        for row in qs:
+            percentage = (float(row["total"]) / float(total_sum) * 100) if total_sum else 0.0
+            results.append(
+                MonthlyTotalType(
+                    month=row["month"],
+                    total=row["total"],
+                    percentage=round(percentage, 2)
+                )
+            )
+        return results
+
 
     def resolve_bank_transactions(
         root,
