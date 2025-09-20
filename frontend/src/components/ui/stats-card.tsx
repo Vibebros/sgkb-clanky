@@ -1,62 +1,21 @@
-// 'use client';
+'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AreaChart, Card } from '@tremor/react';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
 }
 
-const data = [
-  {
-    date: 'Jan 23',
-    revenue: 2340,
-  },
-  {
-    date: 'Feb 23',
-    revenue: 3110,
-  },
-  {
-    date: 'Mar 23',
-    revenue: 4643,
-  },
-  {
-    date: 'Apr 23',
-    revenue: 4650,
-  },
-  {
-    date: 'May 23',
-    revenue: 3980,
-  },
-  {
-    date: 'Jun 23',
-    revenue: 4702,
-  },
-  {
-    date: 'Jul 23',
-    revenue: 5990,
-  },
-  {
-    date: 'Aug 23',
-    revenue: 5700,
-  },
-  {
-    date: 'Sep 23',
-    revenue: 4250,
-  },
-  {
-    date: 'Oct 23',
-    revenue: 4182,
-  },
-  {
-    date: 'Nov 23',
-    revenue: 3812,
-  },
-  {
-    date: 'Dec 23',
-    revenue: 4900,
-  },
-];
+const MONTHLY_QUERY = `
+  query monthly {
+    monthlyTotals {
+      month
+      total
+      percentage
+    }
+  }
+`;
 
 const currencyFormatter = (number) => {
   return '$' + Intl.NumberFormat('us').format(number).toString();
@@ -83,6 +42,43 @@ function formatChange(payload, percentageChange, absoluteChange) {
 
 export default function StatsCard() {
   const [datas, setDatas] = useState(null);
+  const [monthlyData, setMonthlyData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMonthlyData = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:8000/graphql/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            query: MONTHLY_QUERY,
+          }),
+        });
+        
+        const result = await response.json();
+        
+        if (result.data?.monthlyTotals) {
+          const transformedData = result.data.monthlyTotals.map(item => ({
+            date: new Date(item.month).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
+            revenue: parseFloat(item.total),
+            percentage: item.percentage
+          }));
+          setMonthlyData(transformedData);
+        }
+      } catch (error) {
+        console.error('Error fetching monthly data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMonthlyData();
+  }, []);
+
+  const data = monthlyData;
   const payload = datas?.payload[0];
 
   const value = payload?.payload[payload.dataKey];
@@ -101,7 +97,7 @@ export default function StatsCard() {
 
   const formattedValue = payload
     ? currencyFormatter(value)
-    : currencyFormatter(data[0].revenue);
+    : data.length > 0 ? currencyFormatter(data[0].revenue) : currencyFormatter(0);
 
   return (
       <Card className="sm:mx-auto sm:max-w-lg">
@@ -113,7 +109,7 @@ export default function StatsCard() {
         </p>
         <p className="mt-1 flex items-baseline justify-between">
           <span className="text-tremor-default text-tremor-content dark:text-dark-tremor-content">
-            On {payload ? `${payload?.payload?.date}` : `${data[0].date}`}
+            On {payload ? `${payload?.payload?.date}` : data.length > 0 ? `${data[0].date}` : 'Loading...'}
           </span>
           <span
             className={classNames(
