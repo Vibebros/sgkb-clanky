@@ -64,9 +64,28 @@ export default function RootLayout({
           </nav>
         </div>
         <div className="max-w-screen-md mx-auto relative">
-          <ExpandableChat position="bottom-right" size="md">
-          <ExpandableChatHeader>
-            <h3 className="text-lg font-semibold">AI Assistant</h3>
+          <ExpandableChat 
+            position="bottom-right" 
+            size="md"
+            icon={
+              <img 
+                src="/clanky/icon-removed-background.png" 
+                alt="Clanky" 
+                className="w-8 h-8 object-cover rounded-full"
+              />
+            }
+          >
+          <ExpandableChatHeader className="bg-green-50 border-b border-green-200">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center">
+                <img 
+                  src="/clanky/icon-removed-background.png" 
+                  alt="Clanky" 
+                  className="w-8 h-8 object-contain"
+                />
+              </div>
+              <h3 className="text-lg font-semibold text-green-800">Clanky Assistant</h3>
+            </div>
           </ExpandableChatHeader>
           <ExpandableChatBody>
             <div className="p-4 text-sm text-gray-600">
@@ -74,7 +93,7 @@ export default function RootLayout({
             </div>
           </ExpandableChatBody>
           <ExpandableChatFooter>
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
               <input 
                 type="text" 
                 placeholder="Type your message..." 
