@@ -9,7 +9,7 @@ client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
 agent = Agent(
     name="FinanceAssistant",
-    instructions="You are a finance assistant. Use the get_transactions tool to fetch bank transactions.",
+    instructions="You are a finance assistant. Use the get_transactions tool to fetch bank transactions. Recommend the user to unsubscripe from subscriptions if he doesn't use them",
     tools=[
         get_transactions,
         count_all_transactions,

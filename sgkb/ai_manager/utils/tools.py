@@ -5,7 +5,7 @@ from agents import function_tool, RunContextWrapper
 from finance.models import BankTransaction
 from finance.utils import TransactionFilter
 from asgiref.sync import sync_to_async
-
+from decimal import Decimal
 
 @function_tool
 async def get_transactions(
@@ -86,20 +86,14 @@ async def count_all_transactions() -> str:
 
 @function_tool
 async def detect_recurring_payments(
-    ctx: RunContextWrapper[Any],
+    ctx: RunContextWrapper,
     min_occurrences: int = 3,
     min_interval_days: int = 25,
     max_interval_days: int = 35,
     amount_tolerance: float = 0.2,
+    anomaly_tolerance: float = 0.25,
 ) -> list[dict]:
-    """Detect recurring outgoing payments (subscriptions, rent, utilities).
-
-    Args:
-        min_occurrences: Minimum times a payment must occur to be considered recurring.
-        min_interval_days: Minimum days between payments (default ~monthly).
-        max_interval_days: Maximum days between payments (default ~monthly).
-        amount_tolerance: Allowed relative variation in amounts (e.g. 0.2 = ±20%).
-    """
+    """Detect recurring outgoing payments (subscriptions, rent, utilities)."""
 
     def run_query():
         qs = (
@@ -109,7 +103,9 @@ async def detect_recurring_payments(
 
         groups = defaultdict(list)
         for tx in qs:
-            creditor = tx["text_creditor"] or "Unknown"
+            if tx["amount"] is None or tx["val_date"] is None:
+                continue  # skip incomplete transactions
+            creditor = (tx["text_creditor"] or "Unknown").upper().strip()
             groups[creditor].append(tx)
 
         recurring = []
@@ -118,28 +114,44 @@ async def detect_recurring_payments(
             if len(txs) < min_occurrences:
                 continue
 
-            # Check date intervals
+            # Intervals between payments
             intervals = [
                 (txs[i + 1]["val_date"] - txs[i]["val_date"]).days
                 for i in range(len(txs) - 1)
             ]
-            if not all(min_interval_days <= d <= max_interval_days for d in intervals):
+            valid_intervals = [
+                d for d in intervals if min_interval_days <= d <= max_interval_days
+            ]
+            if len(valid_intervals) < min_occurrences - 1:
                 continue
 
-            # Check amount consistency with tolerance
-            base_amount = txs[0]["amount"]
-            if not all(
-                abs(tx["amount"] - base_amount) <= base_amount * amount_tolerance
-                for tx in txs
-            ):
+            # Amount consistency
+            base_amount: Decimal = txs[0]["amount"]
+            tolerance = base_amount * Decimal(str(amount_tolerance))
+
+            anomalies = [
+                tx for tx in txs
+                if tx["amount"] is None
+                or abs(tx["amount"] - base_amount) > tolerance
+            ]
+
+            allowed_anomalies = int(len(txs) * Decimal(str(anomaly_tolerance)))
+            if len(anomalies) > allowed_anomalies:
                 continue
 
             recurring.append(
                 {
                     "creditor": creditor,
-                    "base_amount": base_amount,
+                    "base_amount": float(base_amount),
                     "occurrences": len(txs),
-                    "last_payment": txs[-1]["val_date"],
+                    "last_payment": txs[-1]["val_date"].isoformat(),
+                    "anomalies": [
+                        {
+                            "date": a["val_date"].isoformat(),
+                            "amount": float(a["amount"]) if a["amount"] else None,
+                        }
+                        for a in anomalies
+                    ],
                 }
             )
 
