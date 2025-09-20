@@ -8,37 +8,37 @@
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Chart.js CDN -->
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- Your custom overrides -->
+  <!-- Custom overrides -->
   <link rel="stylesheet" href="{% static 'css/custom.css' %}">
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col">
+<body class="bg-gray-50 min-h-screen flex flex-col text-gray-900">
 
-  <!-- Banner -->
-  <header class="bg-primary text-white text-center py-4">
-    <h1 class="text-xl font-bold">{% block banner %}Smart Finance Planner{% endblock %}</h1>
-    <p class="text-sm">Your personal finance assistant</p>
+  <!-- Banner / Top Nav -->
+  <header class="bg-white shadow-sm p-4 flex items-center justify-between">
+    <h1 class="text-lg font-bold text-primary">{% block banner %}Smart Finance{% endblock %}</h1>
+    <div class="text-sm text-gray-500">💳 My Account</div>
   </header>
 
   <!-- Main content -->
-  <main class="flex-grow overflow-y-auto p-4">
+  <main class="flex-grow overflow-y-auto p-4 space-y-6">
     {% block content %}{% endblock %}
   </main>
 
-  <!-- Footer / Navigation -->
+  <!-- Bottom Nav -->
   <nav class="bg-white shadow-md border-t border-gray-200 fixed bottom-0 left-0 right-0">
     <div class="flex justify-around py-2">
-      <a href="{% url 'dashboard' %}" class="flex flex-col items-center text-gray-600">
+      <a href="{% url 'dashboard' %}" class="flex flex-col items-center text-gray-600 hover:text-primary">
         <span>📊</span>
         <span class="text-xs">Dashboard</span>
       </a>
-      <a href="{% url 'chatbot' %}" class="flex flex-col items-center text-gray-600">
+      <a href="{% url 'chatbot' %}" class="flex flex-col items-center text-gray-600 hover:text-primary">
         <span>💬</span>
-        <span class="text-xs">Chatbot</span>
+        <span class="text-xs">Chat</span>
       </a>
-      <a href="{% url 'partners' %}" class="flex flex-col items-center text-gray-600">
+      <a href="{% url 'partners' %}" class="flex flex-col items-center text-gray-600 hover:text-primary">
         <span>🤝</span>
         <span class="text-xs">Partners</span>
       </a>

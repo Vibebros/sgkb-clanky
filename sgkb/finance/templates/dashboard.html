@@ -1,52 +1,122 @@
 {% extends "base.html" %}
 
 {% block title %}Dashboard{% endblock %}
-{% block banner %}📊 Smart Finance Dashboard{% endblock %}
+{% block banner %}📊 Finance Dashboard{% endblock %}
 
 {% block content %}
-  <!-- Graph -->
-  <div class="bg-white rounded-lg shadow-md p-4 mb-6">
-    <canvas id="financeChart" class="w-full h-48"></canvas>
+  <!-- Balance Card -->
+  <div class="bg-white rounded-2xl shadow p-6 text-center">
+    <p class="text-gray-500">Available Balance</p>
+    <p class="text-3xl font-bold text-primary">CHF 3,250.00</p>
+  </div>
+
+  <!-- Chart Card -->
+  <div class="bg-white rounded-2xl shadow p-4">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="font-bold text-gray-700">Spending by Country</h2>
+      <!-- Filter buttons -->
+      <div class="space-x-2">
+        <button onclick="renderChart('2025-08-01','2025-08-31')" class="px-3 py-1 bg-primary text-white rounded text-xs">Aug 2025</button>
+        <button onclick="renderChart('2025-07-01','2025-07-31')" class="px-3 py-1 bg-gray-200 rounded text-xs">Jul 2025</button>
+      </div>
+    </div>
+    <canvas id="financeChart" class="w-full h-64"></canvas>
   </div>
 
   <!-- Transactions List -->
-  <div class="bg-white rounded-lg shadow-md p-4">
-    <h2 class="font-bold mb-2">Recent Transactions</h2>
-    <ul>
-      <li class="flex justify-between border-b py-2">
-        <span>Netflix</span>
-        <span>- CHF 15</span>
-      </li>
-      <li class="flex justify-between border-b py-2">
-        <span>Kantine Lunch</span>
-        <span>- CHF 12</span>
-      </li>
-      <li class="flex justify-between border-b py-2">
-        <span>Salary</span>
-        <span>+ CHF 3500</span>
-      </li>
+  <div class="bg-white rounded-2xl shadow p-4">
+    <h2 class="font-bold mb-4 text-gray-700">Recent Transactions</h2>
+    <ul id="transactionsList" class="divide-y divide-gray-100 text-sm">
+      <!-- Transactions will be inserted here -->
     </ul>
   </div>
 
-  <!-- Chart Script -->
+  <!-- Chart + Data Script -->
   <script>
     const ctx = document.getElementById('financeChart').getContext('2d');
-    new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-        datasets: [{
-          label: 'Expenses',
-          data: [500, 700, 400, 600, 750],
-          borderColor: '#008751', // your brand green
-          backgroundColor: 'rgba(0, 135, 81, 0.2)',
-          tension: 0.3
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: false } }
-      }
-    });
+    let chart;
+
+    async function fetchData(startDate, endDate) {
+      const query = `
+        query {
+          bankTransactions(
+            direction: 2
+          ) {
+            trxDate
+            amount
+            acquirerCountryName
+            textShortCreditor
+          }
+        }
+      `;
+
+      const response = await fetch("/graphql/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query })
+      });
+
+      const result = await response.json();
+      console.log(result)
+      return result.data.bankTransactions;
+    }
+
+    function groupByCountry(transactions) {
+      const totals = {};
+      transactions.forEach(trx => {
+        const country = trx.acquirerCountryName || "Unknown";
+        const amt = parseFloat(trx.amount);
+        if (!isNaN(amt)) {
+          totals[country] = (totals[country] || 0) + amt;
+        }
+      });
+      return totals;
+    }
+
+    function renderTransactions(transactions) {
+      const list = document.getElementById("transactionsList");
+      list.innerHTML = "";
+      transactions.slice(0, 5).forEach(trx => {
+        const li = document.createElement("li");
+        li.className = "flex justify-between py-3";
+        li.innerHTML = `
+          <span>${trx.textShortCreditor || trx.acquirerCountryName || "Unknown"}</span>
+          <span class="text-red-500">- CHF ${trx.amount}</span>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    async function renderChart(startDate, endDate) {
+      const transactions = await fetchData(startDate, endDate);
+      const grouped = groupByCountry(transactions);
+
+      const labels = Object.keys(grouped);
+      const values = Object.values(grouped);
+
+      if (chart) chart.destroy();
+      chart = new Chart(ctx, {
+        type: "pie",
+        data: {
+          labels: labels,
+          datasets: [{
+            data: values,
+            backgroundColor: [
+              "#008751",
+              "#4dcfa3",
+              "#00653c",
+              "#9ae6b4",
+              "#e2e8f0"
+            ]
+          }]
+        },
+        options: { responsive: true }
+      });
+
+      renderTransactions(transactions);
+    }
+
+    // Load default chart for current month
+    renderChart("2025-08-01", "2025-08-31");
   </script>
 {% endblock %}

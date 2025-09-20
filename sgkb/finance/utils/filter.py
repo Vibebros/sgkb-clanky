@@ -9,7 +9,7 @@ class TransactionFilter:
         max_amount=None,
         country=None,
         direction=None,
-        produkt=Nxone,
+        produkt=None,
         account_name=None,
         customer_name=None,
         buchungs_art_name=None,
