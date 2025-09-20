@@ -1,0 +1,50 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  theme: {
+    extend: {
+      colors: {
+        'custom-green-1': '#628447',
+        'custom-green-2': '#729059',
+        'custom-green-3': '#819D6C',
+        'custom-green-4': '#89A375',
+        'custom-green-5': '#91A97E',
+      },
+    },
+  },
+  plugins: [],
+  safelist: [
+    {
+      pattern: /^(bg|border|text|fill|stroke)-\[#(?:[0-9a-fA-F]{3}){1,2}\]$/,
+    },
+    'bg-[#628447]',
+    'border-[#628447]',
+    'text-[#628447]',
+    'fill-[#628447]',
+    'stroke-[#628447]',
+    'bg-[#729059]',
+    'border-[#729059]',
+    'text-[#729059]',
+    'fill-[#729059]',
+    'stroke-[#729059]',
+    'bg-[#819D6C]',
+    'border-[#819D6C]',
+    'text-[#819D6C]',
+    'fill-[#819D6C]',
+    'stroke-[#819D6C]',
+    'bg-[#89A375]',
+    'border-[#89A375]',
+    'text-[#89A375]',
+    'fill-[#89A375]',
+    'stroke-[#89A375]',
+    'bg-[#91A97E]',
+    'border-[#91A97E]',
+    'text-[#91A97E]',
+    'fill-[#91A97E]',
+    'stroke-[#91A97E]',
+  ],
+}
