@@ -4,8 +4,7 @@ from django.contrib import admin, messages
 from django import forms
 from django.shortcuts import redirect, render
 
-from .models import BankTransaction
-
+from .models import BankTransaction, Partners, Recommendation, Catagory
 
 def safe_int(value):
     try:
@@ -24,7 +23,6 @@ def safe_decimal(value):
 class UploadCSVForm(forms.Form):
     csv_file = forms.FileField()
 
-
 @admin.register(BankTransaction)
 class BankTransactionAdmin(admin.ModelAdmin):
     list_display = (
@@ -38,6 +36,7 @@ class BankTransactionAdmin(admin.ModelAdmin):
         "trx_type_short",
         "buchungs_art_short",
         "direction",
+        "catagory",  # ✅ show category in list
     )
     list_filter = (
         "trx_curry_name",
@@ -46,6 +45,7 @@ class BankTransactionAdmin(admin.ModelAdmin):
         "acquirer_country_name",
         "trx_date",
         "val_date",
+        "catagory",  # ✅ filter by category
     )
     search_fields = (
         "trx_id",
@@ -55,6 +55,7 @@ class BankTransactionAdmin(admin.ModelAdmin):
         "text_debitor",
         "cred_iban",
         "cred_ref_nr",
+        "catagory__name",  # ✅ allow searching by category name
     )
     ordering = ("-trx_date",)
     date_hierarchy = "trx_date"
@@ -67,7 +68,7 @@ class BankTransactionAdmin(admin.ModelAdmin):
             "fields": ("account_name", "currency_type", "macc_type", "produkt", "customer_name")
         }),
         ("Transaction Details", {
-            "fields": ("val_date", "trx_date", "direction", "amount", "trx_curry_id", "trx_curry_name")
+            "fields": ("val_date", "trx_date", "direction", "amount", "trx_curry_id", "trx_curry_name", "catagory")  # ✅ include category here
         }),
         ("Texts", {
             "fields": ("text_short_creditor", "text_creditor", "text_short_debitor", "text_debitor")
@@ -107,6 +108,12 @@ class BankTransactionAdmin(admin.ModelAdmin):
                     df = df.fillna("")  # Replace NaN with empty string
 
                     for _, row in df.iterrows():
+                        # Handle category (create if it doesn't exist)
+                        category_name = row.get("category", "").strip()
+                        cat_obj = None
+                        if category_name:
+                            cat_obj, _ = Catagory.objects.get_or_create(name=category_name)
+
                         BankTransaction.objects.create(
                             account_name=row.get("MONEY_ACCOUNT_NAME", ""),
                             currency_type=row.get("MAC_CURRY_NAME", ""),
@@ -120,9 +127,9 @@ class BankTransactionAdmin(admin.ModelAdmin):
                             buchungs_art_short=row.get("BUCHUNGS_ART_SHORT", ""),
                             buchungs_art_name=row.get("BUCHUNGS_ART_NAME", ""),
                             val_date=pd.to_datetime(row.get("VAL_DATE"), errors="coerce").date()
-                                     if row.get("VAL_DATE") else None,
+                                    if row.get("VAL_DATE") else None,
                             trx_date=pd.to_datetime(row.get("TRX_DATE"), errors="coerce").date()
-                                     if row.get("TRX_DATE") else None,
+                                    if row.get("TRX_DATE") else None,
                             direction=safe_int(row.get("DIRECTION")),
                             amount=safe_decimal(row.get("AMOUNT")),
                             trx_curry_id=safe_int(row.get("TRX_CURRY_ID")),
@@ -140,6 +147,7 @@ class BankTransactionAdmin(admin.ModelAdmin):
                             cred_addr_text=row.get("CRED_ADDR_TEXT", ""),
                             cred_ref_nr=row.get("CRED_REF_NR", ""),
                             cred_info=row.get("CRED_INFO", ""),
+                            catagory=cat_obj,  # assign category here
                         )
 
                     self.message_user(request, "CSV file uploaded and transactions imported successfully!", level=messages.SUCCESS)
@@ -153,3 +161,26 @@ class BankTransactionAdmin(admin.ModelAdmin):
             form = UploadCSVForm()
 
         return render(request, "admin/csv_upload.html", {"form": form})
+
+
+
+@admin.register(Partners)
+class PartnersAdmin(admin.ModelAdmin):
+    list_display = ("id", "name", "short_benefits")
+    search_fields = ("name", "customer_benifits")
+    ordering = ("name",)
+
+    def short_benefits(self, obj):
+        return (obj.customer_benifits[:75] + "...") if len(obj.customer_benifits) > 75 else obj.customer_benifits
+    short_benefits.short_description = "Customer Benefits"
+
+
+@admin.register(Recommendation)
+class RecommendationAdmin(admin.ModelAdmin):
+    list_display = ("id", "name", "short_description")
+    search_fields = ("name", "description")
+    ordering = ("name",)
+
+    def short_description(self, obj):
+        return (obj.description[:75] + "...") if len(obj.description) > 75 else obj.description
+    short_description.short_description = "Description"

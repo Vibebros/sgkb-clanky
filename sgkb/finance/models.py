@@ -9,6 +9,8 @@ class Logo(models.Model):
 
 class Catagory(models.Model):
     name = models.CharField(max_length=255, unique=True)
+    def __str__(self):
+        return f"{self.name}"
 
 
 class BankTransaction(models.Model):
@@ -53,7 +55,7 @@ class BankTransaction(models.Model):
     cred_info = models.TextField(blank=True, null=True, verbose_name="Creditor Info")  # CRED_INFO
 
     logo = models.ForeignKey(Logo, verbose_name='URL', blank=True, null=True, on_delete=models.SET_NULL)
-    catagory = models.ForeignKey(Catagory, verbose_name='URL', blank=True, null=True, on_delete=models.SET_NULL)
+    catagory = models.ForeignKey(Catagory, verbose_name='category', blank=True, null=True, on_delete=models.SET_NULL)
     class Meta:
         verbose_name = "Bank Transaction"
         verbose_name_plural = "Bank Transactions"
@@ -61,3 +63,12 @@ class BankTransaction(models.Model):
 
     def __str__(self):
         return f"{self.trx_id} - {self.customer_name} - {self.amount} {self.trx_curry_name}"
+
+
+class Partners(models.Model):
+    name = models.CharField(max_length=255, verbose_name="Partner Name")
+    customer_benifits = models.TextField(max_length=255, verbose_name="Customer Benifits")
+
+class Recommendation(models.Model):
+    name = models.CharField(max_length=255, verbose_name="Partner Name")
+    description = models.TextField(max_length=255, verbose_name="Description")

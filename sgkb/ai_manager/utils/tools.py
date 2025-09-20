@@ -2,10 +2,12 @@ import asyncio
 from collections import defaultdict
 from typing import Any
 from agents import function_tool, RunContextWrapper
-from finance.models import BankTransaction
 from finance.utils import TransactionFilter
 from asgiref.sync import sync_to_async
 from decimal import Decimal
+from finance.models import BankTransaction, Partners, Recommendation
+from datetime import date, timedelta
+
 
 @function_tool
 async def get_transactions(
@@ -157,4 +159,62 @@ async def detect_recurring_payments(
 
         return recurring
 
+    return await asyncio.to_thread(run_query)
+
+
+
+@function_tool
+async def get_partners(ctx: RunContextWrapper) -> list[dict]:
+    """Fetch all SGKB partners with their benefits."""
+    def run_query():
+        return list(
+            Partners.objects.values("id", "name", "customer_benifits")
+        )
+    return await asyncio.to_thread(run_query)
+
+
+@function_tool
+async def check_recent_partner_transactions(
+    ctx: RunContextWrapper,
+    days: int = 7
+) -> list[dict]:
+    """Check recent transactions that match a known partner by name."""
+    def run_query():
+        since = date.today() - timedelta(days=days)
+        partners = list(Partners.objects.all())
+        txs = BankTransaction.objects.filter(direction=2, val_date__gte=since)
+
+        matches = []
+        for tx in txs:
+            for partner in partners:
+                if partner.name.upper() in (tx.text_creditor or "").upper():
+                    matches.append({
+                        "transaction_id": tx.id,
+                        "partner_id": partner.id,
+                        "partner_name": partner.name,
+                        "amount": float(tx.amount) if tx.amount else None,
+                        "date": tx.val_date.isoformat(),
+                        "creditor": tx.text_creditor,
+                    })
+        return matches
+
+    return await asyncio.to_thread(run_query)
+
+
+@function_tool
+async def create_recommendation(
+    ctx: RunContextWrapper,
+    partner_id: int,
+    transaction_id: int,
+    description: str
+) -> dict:
+    """Create a recommendation to link a transaction with a partner."""
+    def run_query():
+        partner = Partners.objects.get(id=partner_id)
+        tx = BankTransaction.objects.get(id=transaction_id)
+        rec = Recommendation.objects.create(
+            name=partner.name,
+            description=description or f"Suggested link: {partner.name} ↔ TX#{tx.id} ({tx.amount} on {tx.val_date})."
+        )
+        return {"id": rec.id, "name": rec.name, "description": rec.description}
     return await asyncio.to_thread(run_query)
