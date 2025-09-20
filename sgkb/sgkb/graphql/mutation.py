@@ -1,5 +1,8 @@
 import graphene
 
 
-class Mutation(graphene.ObjectType):
+from ai_manager.graphql import Mutation as AIMutation
+
+
+class Mutation(AIMutation, graphene.ObjectType):
     pass

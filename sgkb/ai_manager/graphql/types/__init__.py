@@ -1,0 +1,2 @@
+from ai_manager.graphql.types.preference import PreferenceType
+from ai_manager.graphql.types.preference_category import PreferenceCategoryType

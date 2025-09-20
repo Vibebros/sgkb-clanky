@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'finance.apps.FinanceConfig',
     'graphene_django',
+    'ai_manager.apps.AiManagerConfig'
 ]
 
 GRAPHENE = {

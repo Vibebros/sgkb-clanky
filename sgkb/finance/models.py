@@ -51,6 +51,7 @@ class BankTransaction(models.Model):
     class Meta:
         verbose_name = "Bank Transaction"
         verbose_name_plural = "Bank Transactions"
+        ordering = ['-val_date']
 
     def __str__(self):
         return f"{self.trx_id} - {self.customer_name} - {self.amount} {self.trx_curry_name}"
