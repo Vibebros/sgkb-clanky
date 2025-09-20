@@ -7,3 +7,4 @@ redis
 requests
 openai
 openai-agents
+django-cors-headers
