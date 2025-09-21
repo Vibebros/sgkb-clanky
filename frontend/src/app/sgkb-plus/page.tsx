@@ -110,7 +110,7 @@ export default function SGKBPlusPage() {
   );
 
   return (
-    <div className="px-6 py-8 pb-24 space-y-8">
+    <div className="space-y-8 px-6 py-8 pb-24">
       <PageHeader
         title="SGKB Portal"
         subtitle="Explore SGKB+ loyalty perks, missions, and recent activity."

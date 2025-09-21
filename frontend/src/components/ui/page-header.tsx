@@ -7,15 +7,17 @@ type PageHeaderProps = {
 
 export function PageHeader({ title, subtitle }: PageHeaderProps) {
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-3xl font-semibold text-gray-900">{title}</h1>
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="min-w-0 text-2xl font-semibold text-gray-900 sm:text-3xl">
+          {title}
+        </h1>
         <Image
           src="/sgkb/logo-sgkb.jpg"
           alt="SGKB logo"
-          width={128}
-          height={32}
-          className="h-10 w-auto object-contain"
+          width={120}
+          height={36}
+          className="h-8 w-auto shrink-0 object-contain sm:h-10"
           priority
         />
       </div>

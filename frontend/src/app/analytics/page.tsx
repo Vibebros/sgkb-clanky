@@ -425,7 +425,7 @@ export default function AnalyticsPage() {
   );
 
   return (
-    <div className="px-6 py-8 space-y-8">
+    <div className="space-y-8 px-6 py-8">
       <PageHeader
         title="SGKB Portal"
         subtitle="Track volume trends, inflow vs. outflow, and top merchants from your recent activity."

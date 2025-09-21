@@ -131,17 +131,13 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col items-center min-h-screen pt-8 pb-16">
-      <div className="w-full max-w-6xl px-4">
+    <div className="min-h-screen pb-16">
+      <div className="space-y-8 px-6 py-8">
         <PageHeader
           title="SGKB Portal"
           subtitle="Welcome back, John! Monitor your finances and explore the latest insights."
         />
-      </div>
-      <div className="w-full max-w-6xl px-4 mt-6">
         <StatsCard />
-      </div>
-      <div className="w-full max-w-6xl px-4 mt-8">
         <Card className="w-full overflow-hidden rounded-3xl border border-gray-100 bg-white/80 shadow-lg backdrop-blur-sm">
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-4 px-6 pt-6">
@@ -180,7 +176,7 @@ export default function Home() {
               </p>
             </div>
             <div
-              className="px-1 overflow-hidden"
+              className="px-1 overflow-x-hidden"
               onTouchStart={handleTouchStart}
               onTouchEnd={handleTouchEnd}
             >
@@ -195,7 +191,7 @@ export default function Home() {
                     titleClassName="text-xl font-semibold text-gray-900"
                     chartClassName="mt-4 h-56"
                     listHeaderClassName="mt-6"
-                    listWrapperClassName="mt-3 max-h-56 overflow-y-auto pr-1"
+                    listWrapperClassName="mt-3 pr-1 sm:max-h-56 sm:overflow-y-auto"
                     listClassName="mt-0"
                   />
                 </div>
@@ -213,7 +209,7 @@ export default function Home() {
                       <h4 className="text-base font-semibold text-gray-900">
                         Spending by country
                       </h4>
-                      <div className="mt-3 max-h-56 overflow-y-auto pr-1 no-scrollbar">
+                      <div className="mt-3 pr-1 no-scrollbar sm:max-h-56 sm:overflow-y-auto">
                         <List>
                           {sortedCountryTotals.map((item) => (
                             <ListItem

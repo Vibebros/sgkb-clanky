@@ -145,8 +145,8 @@ export default function PieChart({
       <div className={cn("mt-2", listWrapperClassName)}>
         <List className={cn("mt-2", listClassName)}>
           {expenseCategories.map((item) => (
-            <ListItem key={item.name} className="space-x-6">
-              <div className="flex items-center space-x-2.5 truncate">
+            <ListItem key={item.name} className="items-start gap-4">
+              <div className="flex min-w-0 items-center gap-2.5 truncate">
                 <span
                   className={classNames(
                     item.color,
@@ -158,11 +158,11 @@ export default function PieChart({
                   {item.name}
                 </span>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="ml-auto flex flex-col items-end gap-1 text-right sm:flex-row sm:items-center sm:gap-2">
                 <span className="font-medium tabular-nums text-tremor-content-strong dark:text-dark-tremor-content-strong">
                   {currencyFormatter(item.amount)}
                 </span>
-                <span className="rounded-tremor-small bg-tremor-background-subtle px-1.5 py-0.5 text-tremor-label font-medium tabular-nums text-tremor-content-emphasis dark:bg-dark-tremor-background-subtle dark:text-dark-tremor-content-emphasis">
+                <span className="hidden rounded-tremor-small bg-tremor-background-subtle px-1.5 py-0.5 text-tremor-label font-medium tabular-nums text-tremor-content-emphasis dark:bg-dark-tremor-background-subtle dark:text-dark-tremor-content-emphasis sm:inline-flex">
                   {item.share}
                 </span>
               </div>

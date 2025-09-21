@@ -118,7 +118,7 @@ export default function TransactionsPage() {
   }, [])
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-8 px-6 py-8">
       <PageHeader
         title="SGKB Portal"
         subtitle="Review your recent bank transactions and their key details."
