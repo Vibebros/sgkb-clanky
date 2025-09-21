@@ -34,7 +34,7 @@ export default function RootLayout({
           <nav className="border-t border-gray-200 bg-white fixed bottom-0 left-0 right-0 max-w-screen-md mx-auto">
             <div className="flex justify-around py-4">
               <a
-                href="/"
+                href="/sgkb-plus"
                 className="flex flex-col items-center text-gray-600 hover:text-gray-900"
               >
                 <svg
@@ -48,10 +48,10 @@ export default function RootLayout({
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                    d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.043 3.2a1 1 0 00.95.69h3.362c.969 0 1.371 1.24.588 1.81l-2.72 1.977a1 1 0 00-.364 1.118l1.039 3.2c.3.922-.755 1.688-1.54 1.118l-2.72-1.978a1 1 0 00-1.176 0l-2.72 1.978c-.785.57-1.84-.196-1.54-1.118l1.04-3.2a1 1 0 00-.365-1.118L5.106 8.627c-.783-.57-.38-1.81.588-1.81h3.362a1 1 0 00.95-.69l1.043-3.2z"
                   />
                 </svg>
-                <span className="text-xs">Home</span>
+                <span className="text-xs">SGKB+</span>
               </a>
               <a
                 href="/transactions"
@@ -72,6 +72,26 @@ export default function RootLayout({
                   />
                 </svg>
                 <span className="text-xs">Transactions</span>
+              </a>
+              <a
+                href="/"
+                className="flex flex-col items-center text-gray-600 hover:text-gray-900"
+              >
+                <svg
+                  className="w-6 h-6 mb-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                  />
+                </svg>
+                <span className="text-xs">Home</span>
               </a>
               <a
                 href="/analytics"
