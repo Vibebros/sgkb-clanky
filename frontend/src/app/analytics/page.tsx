@@ -465,6 +465,9 @@ export default function AnalyticsPage() {
                 {bestMonth ? formatMonthLabel(bestMonth.month) : "No data"}
               </p>
             </div>
+          </section>
+
+          <section>
             <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm flex flex-col">
               <p className="text-sm text-gray-500">AI savings ideas</p>
               <p className="mt-2 text-2xl font-semibold text-gray-900">
