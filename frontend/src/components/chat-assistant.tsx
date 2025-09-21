@@ -55,6 +55,12 @@ export function ChatAssistant() {
     "Gibt es ungewohnte Ausgaben in den letzten 14 Tagen?",
   ];
 
+  const followUps = [
+    { label: "Probiere es nochmal", value: "Probiere es nochmal" },
+    { label: "Ich hätte gerne mehr Details", value: "Ich hätte gerne mehr Details" },
+    { label: "Wie bist du auf die Antwort gekommen", value: "Wie bist du auf die Antwort gekommen?" },
+  ];
+
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
@@ -167,6 +173,19 @@ export function ChatAssistant() {
         </div>
       </ExpandableChatBody>
       <ExpandableChatFooter>
+        <div className="flex flex-wrap gap-2 pb-2">
+          {followUps.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              className="rounded-full border border-gray-300 px-3 py-1 text-xs text-gray-600 transition hover:bg-gray-100 disabled:opacity-50"
+              onClick={() => sendMessage(option.value)}
+              disabled={isSending}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
         <form
           className="flex gap-2"
           onSubmit={(event) => {
@@ -210,7 +229,8 @@ function buildAssistantReply(payload: NormalizedResponse): ChatMessage[] {
       content: "Hier ist die Übersicht deiner Einnahmen:",
     });
     responses.push(header);
-    data.einnahmen.slice(0, 5).forEach((entry, index) => {
+    const sorted = [...data.einnahmen].sort((a, b) => amountOf(b) - amountOf(a));
+    sorted.slice(0, 5).forEach((entry, index) => {
       responses.push(
         createMessage({
           role: "assistant",
@@ -234,7 +254,8 @@ function buildAssistantReply(payload: NormalizedResponse): ChatMessage[] {
       content: "Und hier die größten Ausgaben, frisch aus dem Kontobuch:",
     });
     responses.push(header);
-    data.ausgaben.slice(0, 5).forEach((entry, index) => {
+    const sorted = [...data.ausgaben].sort((a, b) => amountOf(b) - amountOf(a));
+    sorted.slice(0, 5).forEach((entry, index) => {
       responses.push(
         createMessage({
           role: "assistant",
@@ -271,7 +292,8 @@ function buildAssistantReply(payload: NormalizedResponse): ChatMessage[] {
       }),
     );
 
-    rows.slice(0, 5).forEach((row, index) => {
+    const sortedRows = [...rows].sort((a, b) => amountOf(b) - amountOf(a));
+    sortedRows.slice(0, 5).forEach((row, index) => {
       responses.push(
         createMessage({
           role: "assistant",
@@ -289,7 +311,7 @@ function buildAssistantReply(payload: NormalizedResponse): ChatMessage[] {
     }
   }
 
-  if (
+ if (
     data &&
     !data.db_result &&
     Array.isArray((data as { rows?: unknown[] }).rows) &&
@@ -310,7 +332,8 @@ function buildAssistantReply(payload: NormalizedResponse): ChatMessage[] {
       );
     }
 
-    rows.slice(0, 5).forEach((row, index) => {
+    const sortedRows = [...rows].sort((a, b) => amountOf(b) - amountOf(a));
+    sortedRows.slice(0, 5).forEach((row, index) => {
       responses.push(
         createMessage({
           role: "assistant",
@@ -318,6 +341,27 @@ function buildAssistantReply(payload: NormalizedResponse): ChatMessage[] {
         }),
       );
     });
+  }
+
+  if (data && Array.isArray((data as { results?: unknown[] }).results)) {
+    const rows = (data as { results: Array<Record<string, unknown>> }).results;
+    const sortedRows = [...rows].sort((a, b) => amountOf(b) - amountOf(a));
+    sortedRows.slice(0, 5).forEach((row, index) => {
+      responses.push(
+        createMessage({
+          role: "assistant",
+          content: formatTransaction(row, index + 1),
+        }),
+      );
+    });
+    if (rows.length > 5) {
+      responses.push(
+        createMessage({
+          role: "assistant",
+          content: `… plus ${rows.length - 5} weitere Datensätze im Gesamtpaket.`,
+        }),
+      );
+    }
   }
 
   if (data && data.advisor_output && typeof data.advisor_output === "object") {
@@ -378,6 +422,69 @@ function buildAssistantReply(payload: NormalizedResponse): ChatMessage[] {
         );
       });
     }
+  }
+
+  if (data) {
+    Object.entries(data).forEach(([key, value]) => {
+      if (key === "einnahmen" || key === "ausgaben" || key === "db_result" || key === "advisor_output") {
+        return;
+      }
+
+      if (Array.isArray(value) && value.length > 0 && typeof value[0] === "object") {
+        const rows = value as Array<Record<string, unknown>>;
+        const sortedRows = [...rows].sort((a, b) => amountOf(b) - amountOf(a));
+        responses.push(
+          createMessage({
+            role: "assistant",
+            content: `Hier die Übersicht für ${formatKey(key)}:`,
+          }),
+        );
+        sortedRows.slice(0, 5).forEach((row, index) => {
+          responses.push(
+            createMessage({
+              role: "assistant",
+              content: formatTransaction(row, index + 1),
+            }),
+          );
+        });
+        if (rows.length > 5) {
+          responses.push(
+            createMessage({
+              role: "assistant",
+              content: `… insgesamt ${rows.length} Einträge. Sag Bescheid, wenn ich alle zeigen soll!`,
+            }),
+          );
+        }
+        return;
+      }
+
+      if (Array.isArray(value) && value.length > 0 && value.every((item) => typeof item === "string" || typeof item === "number")) {
+        responses.push(
+          createMessage({
+            role: "assistant",
+            content: `Hier die Übersicht für ${formatKey(key)}:`,
+          }),
+        );
+
+        (value as Array<string | number>).slice(0, 10).forEach((item) => {
+          responses.push(
+            createMessage({
+              role: "assistant",
+              content: `• ${item}`,
+            }),
+          );
+        });
+
+        if (value.length > 10) {
+          responses.push(
+            createMessage({
+              role: "assistant",
+              content: `… insgesamt ${value.length} Einträge. Sag Bescheid, wenn ich alle zeigen soll!`,
+            }),
+          );
+        }
+      }
+    });
   }
 
   if (responses.length === 0) {
@@ -454,6 +561,18 @@ function valueOrFallback(value: unknown, fallback: string): string {
   return String(value);
 }
 
+function amountOf(entry: Record<string, unknown>): number {
+  const raw = entry.amount ?? entry["amount"];
+  if (typeof raw === "number") {
+    return raw;
+  }
+  if (typeof raw === "string") {
+    const parsed = Number(raw.replace(/[^0-9.-]/g, ""));
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  return 0;
+}
+
 function cleanDescription(value: string): string {
   const trimmed = value.trim();
   if (!trimmed) {
@@ -477,4 +596,10 @@ const currencyFormatter = new Intl.NumberFormat("de-CH", {
 
 function formatCurrency(value: number): string {
   return currencyFormatter.format(value);
+}
+
+function formatKey(key: string): string {
+  return key
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (match) => match.toUpperCase());
 }

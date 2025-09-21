@@ -8,12 +8,14 @@ from dataclasses import asdict, dataclass, field
 from datetime import date
 from typing import Any, Literal
 from decimal import Decimal
+from json import JSONDecodeError
 
 from agents import Agent, RunContextWrapper, Runner, function_tool
 from django.utils import timezone
 
 from finance.models import BankTransaction
 from finance.utils import TransactionFilter
+from .utils.tools import detect_recurring_payments
 
 
 ALLOWED_DB_FILTERS = {
@@ -204,6 +206,8 @@ def _run_transaction_query(
     limit: int = 20,
     offset: int = 0,
     fields: list[str] | None = None,
+    order_by: str | None = None,
+    order_desc: bool = True,
 ) -> DBResult:
     capped_limit = max(1, min(int(limit), 100))
     safe_offset = max(0, int(offset))
@@ -211,8 +215,15 @@ def _run_transaction_query(
 
     queryset = BankTransaction.objects.all()
     queryset = TransactionFilter.apply(queryset, **filters)
+
+    if order_by:
+        ordering = f"-{order_by}" if order_desc else order_by
+        queryset = queryset.order_by(ordering, "-val_date")
+    else:
+        queryset = queryset.order_by("-val_date")
+
     total = queryset.count()
-    window = queryset.order_by("-val_date")[safe_offset : safe_offset + capped_limit]
+    window = queryset[safe_offset : safe_offset + capped_limit]
     rows = list(window.values(*selected_fields))
 
     for row in rows:
@@ -233,6 +244,8 @@ async def db_searcher_tool(
     offset: int = 0,
     fields: list[str] | None = None,
 ) -> dict[str, Any]:
+    order_by_field: str | None = None
+    order_desc = True
     if filters_json:
         try:
             raw_filters = json.loads(filters_json)
@@ -252,6 +265,21 @@ async def db_searcher_tool(
                 "offset": int(offset),
                 "rows": [],
             }
+        raw_order = raw_filters.pop("order_by", None)
+        if isinstance(raw_order, str):
+            raw_order_lower = raw_order.lower()
+            if raw_order_lower in {"amount_desc", "betrag_desc", "höchste", "groesste", "groessten"}:
+                order_by_field = "amount"
+                order_desc = True
+            elif raw_order_lower in {"amount_asc", "betrag_asc"}:
+                order_by_field = "amount"
+                order_desc = False
+            elif raw_order_lower in {"date_desc", "datum_desc"}:
+                order_by_field = "val_date"
+                order_desc = True
+            elif raw_order_lower in {"date_asc", "datum_asc"}:
+                order_by_field = "val_date"
+                order_desc = False
     else:
         raw_filters = {}
 
@@ -262,6 +290,8 @@ async def db_searcher_tool(
         limit=limit,
         offset=offset,
         fields=fields,
+        order_by=order_by_field,
+        order_desc=order_desc,
     )
     return result.to_dict()
 
@@ -296,9 +326,10 @@ class ClankyMultiAgentSystem:
             instructions=(
                 "Du erstellst als Clanky-Advisor Finanzanalysen in deutscher Sprache. "
                 "Bleibe positiv, motivierend und klar: gib hilfreiche Tipps mit einem leichten Augenzwinkern. "
-                "Nutze db_searcher_tool (Parameter filters_json) um Daten abzurufen. "
+                "Nutze db_searcher_tool (Parameter filters_json) sowie detect_recurring_payments, "
+                "wenn du wiederkehrende Kosten untersuchen sollst. "
                 "Antworte nur mit JSON (recommendation, key_insights, evidence, caveats)."),
-            tools=[db_searcher_tool],
+            tools=[db_searcher_tool, detect_recurring_payments],
         )
 
     def run(
@@ -327,6 +358,11 @@ class ClankyMultiAgentSystem:
                 self._run_orchestrator_routing(task_spec)
             )
 
+            summary_lower = task_spec.intent_summary.lower()
+            if routing.route == "db_search":
+                if any(keyword in summary_lower for keyword in ["höchste", "hoechste", "größte", "groesste", "top", "highest"]):
+                    routing.filters["order_by"] = routing.filters.get("order_by", "amount_desc")
+            
             if routing.route == "clarify":
                 return NormalizedResponse(
                     status="clarification_required",
@@ -381,12 +417,30 @@ class ClankyMultiAgentSystem:
     # Internals
     def _run_conversational_agent(self, prompt: str) -> TaskSpec:
         result = Runner.run_sync(self.conversational_agent, prompt)
-        return TaskSpec.from_json(result.final_output)
+        try:
+            return TaskSpec.from_json(result.final_output)
+        except JSONDecodeError:
+            fallback = {
+                "task_type": "clarification",
+                "intent_summary": "Conversational agent lieferte kein gültiges JSON.",
+                "filters": {},
+                "needs_clarification": True,
+                "clarification_question": "Magst du deine Frage noch einmal etwas klarer formulieren?",
+            }
+            return TaskSpec.from_json(json.dumps(fallback, ensure_ascii=False))
 
     def _run_orchestrator_routing(self, task_spec: TaskSpec) -> RouteDecision:
         payload = {"phase": "routing", "task_spec": task_spec.to_dict()}
         result = Runner.run_sync(self.orchestrator_agent, json.dumps(payload, ensure_ascii=False))
-        return RouteDecision.from_json(result.final_output)
+        try:
+            return RouteDecision.from_json(result.final_output)
+        except JSONDecodeError:
+            fallback = {
+                "route": "clarify",
+                "reason": "Ich habe keine klare Routing-Entscheidung erhalten. Magst du mir noch etwas Kontext geben?",
+                "filters": {},
+            }
+            return RouteDecision.from_json(json.dumps(fallback, ensure_ascii=False))
 
     def _normalize_route_decision(self, decision: RouteDecision) -> RouteDecision:
         allowed = {"db_search", "financial_advisor", "clarify", "reject"}
@@ -433,8 +487,19 @@ class ClankyMultiAgentSystem:
         if decision.route == "db_search" and not decision.filters:
             decision.filters = {}
 
-        safe_limit = max(1, min(int(decision.limit), 100))
-        safe_offset = max(0, int(decision.offset))
+        safe_limit_raw = decision.limit if decision.limit is not None else 20
+        safe_offset_raw = decision.offset if decision.offset is not None else 0
+        try:
+            safe_limit = int(safe_limit_raw)
+        except (TypeError, ValueError):
+            safe_limit = 20
+        try:
+            safe_offset = int(safe_offset_raw)
+        except (TypeError, ValueError):
+            safe_offset = 0
+
+        safe_limit = max(1, min(safe_limit, 100))
+        safe_offset = max(0, safe_offset)
 
         if decision.route != "db_search":
             decision.filters = {}
@@ -453,7 +518,16 @@ class ClankyMultiAgentSystem:
             self.financial_advisor_agent,
             json.dumps(task_spec.to_dict(), ensure_ascii=False),
         )
-        return AdvisorOutput.from_json(result.final_output)
+        try:
+            return AdvisorOutput.from_json(result.final_output)
+        except JSONDecodeError:
+            fallback = {
+                "recommendation": "Ich konnte keine Beratung erstellen – magst du mir weitere Details geben?",
+                "key_insights": [],
+                "evidence": [],
+                "caveats": [],
+            }
+            return AdvisorOutput.from_json(json.dumps(fallback, ensure_ascii=False))
 
     def _finalize(
         self,
@@ -471,7 +545,14 @@ class ClankyMultiAgentSystem:
             self.orchestrator_agent,
             json.dumps(payload, ensure_ascii=False),
         )
-        response = NormalizedResponse.from_json(result.final_output)
+        try:
+            response = NormalizedResponse.from_json(result.final_output)
+        except JSONDecodeError:
+            return NormalizedResponse(
+                status="success",
+                message="Hier sind die angefragten Daten – sag Bescheid, wenn ich sie hübscher aufbereiten soll!",
+                data=result_payload,
+            )
         if response.status == "error":
             return NormalizedResponse(
                 status="success",

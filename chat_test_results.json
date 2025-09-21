@@ -1,0 +1,458 @@
+[
+  {
+    "case": "SummerHoliday",
+    "exchanges": [
+      {
+        "prompt": "Wie viel haben mich meine Sommerferien gekostet?",
+        "status": 200,
+        "response": {
+          "status": "clarification_required",
+          "message": "Meinst du die Sommerferien dieses Jahres? Über welchen Zeitraum hast du Ferien gemacht?",
+          "data": {
+            "task_spec": {
+              "task_type": "insight",
+              "intent_summary": "Kosten der Sommerferien herausfinden",
+              "filters": {
+                "buchungskategorie": "Sommerferien",
+                "ausgaben_typ": "gesamt"
+              },
+              "timeframe": "letzte Sommerferien",
+              "entities": [
+                "Sommerferien",
+                "Kosten"
+              ],
+              "needs_clarification": true,
+              "clarification_question": "Meinst du die Sommerferien dieses Jahres? Über welchen Zeitraum hast du Ferien gemacht?",
+              "raw": null
+            }
+          }
+        }
+      },
+      {
+        "prompt": "Nutze bitte den Zeitraum 01.08.2025 bis 31.08.2025.",
+        "status": 200,
+        "response": {
+          "status": "success",
+          "message": "Hier kommen deine Urlaubskosten für August 2025 hereinspaziert – fast wie eine sommerliche Brise auf dem Lieblingsstrand! Im gewählten Zeitraum hast du insgesamt 1'282 CHF für Reisen, Urlaub oder Freizeit ausgegeben. Falls du eine detaillierte Auflistung möchtest, sag einfach Bescheid – ich habe alle Positionen liebevoll für dich parat.",
+          "data": {
+            "total_expenses": 1282,
+            "currency": "CHF",
+            "timeframe": {
+              "start": "2025-08-01",
+              "end": "2025-08-31"
+            },
+            "details_available": true
+          }
+        }
+      }
+    ]
+  },
+  {
+    "case": "MostExpensiveMonth",
+    "exchanges": [
+      {
+        "prompt": "Welcher Monat war mein teuerster?",
+        "status": 500,
+        "response": {
+          "error": "Assistant processing failed.",
+          "details": "int() argument must be a string, a bytes-like object or a real number, not 'NoneType'"
+        }
+      }
+    ]
+  },
+  {
+    "case": "ByCountry",
+    "exchanges": [
+      {
+        "prompt": "Zeig mir meine Ausgaben nach Ländern sortiert.",
+        "status": 500,
+        "response": {
+          "error": "Assistant processing failed.",
+          "details": "Expecting ',' delimiter: line 66 column 7 (char 2100)"
+        }
+      }
+    ]
+  },
+  {
+    "case": "ATMWithdrawals",
+    "exchanges": [
+      {
+        "prompt": "Wie viele Bancomat-Abhebungen hatte ich letztes Jahr?",
+        "status": 200,
+        "response": {
+          "status": "success",
+          "message": "Trommelwirbel! 🎶 Die Anzahl der Bancomat-Abhebungen für das letzte Jahr ist bereit zum Abheben: Insgesamt wurden 6 Abhebungen erkannt. Falls Sie noch weitere spannende Zahlen möchten, lassen Sie es mich einfach wissen – ich tanze gern weiter auf den Datenklaviertasten!",
+          "data": {
+            "anzahl_bancomat_abhebungen_letztes_jahr": 6,
+            "details": [
+              {
+                "id": 179,
+                "val_date": "2025-09-05",
+                "amount": 200.0,
+                "buchungs_art_name": "Bancomat-Bezug"
+              },
+              {
+                "id": 24,
+                "val_date": "2025-08-19",
+                "amount": 200.0,
+                "buchungs_art_name": "Bancomat-Bezug"
+              },
+              {
+                "id": 81,
+                "val_date": "2025-08-07",
+                "amount": 300.0,
+                "buchungs_art_name": "Bancomat-Bezug"
+              },
+              {
+                "id": 82,
+                "val_date": "2025-08-07",
+                "amount": 200.0,
+                "buchungs_art_name": "Bancomat-Bezug"
+              },
+              {
+                "id": 182,
+                "val_date": "2025-08-05",
+                "amount": 300.0,
+                "buchungs_art_name": "Bancomat-Bezug"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "case": "MonthlyFixedCosts",
+    "exchanges": [
+      {
+        "prompt": "Was sind meine monatlichen Fixkosten?",
+        "status": 500,
+        "response": {
+          "error": "Assistant processing failed.",
+          "details": "Expecting ',' delimiter: line 37 column 7 (char 1616)"
+        }
+      }
+    ]
+  },
+  {
+    "case": "RecurringYearEnd",
+    "exchanges": [
+      {
+        "prompt": "Welche wiederkehrenden Kosten erwarten mich zum Jahreswechsel?",
+        "status": null,
+        "response": {
+          "error": "HTTPConnectionPool(host='127.0.0.1', port=8000): Read timed out. (read timeout=60)"
+        }
+      }
+    ]
+  },
+  {
+    "case": "SubscriptionsTotal",
+    "exchanges": [
+      {
+        "prompt": "Was kosten mich meine Abos pro Monat insgesamt?",
+        "status": 200,
+        "response": {
+          "status": "success",
+          "message": "Mit einem kleinen Trommelwirbel kommt hier die Antwort auf die spannende Frage, wie viel im letzten Monat insgesamt für Abonnements ausgegeben wurde: Es sind 1'282 CHF. Das Summenauswerten hat fast schon Spaß gemacht – und gibt dir jetzt einen prima Überblick! Wenn du noch Details zu einzelnen Abos brauchst, frag mich einfach erneut. 😊",
+          "data": {
+            "monatliche_abonnement_ausgaben": 1282
+          }
+        }
+      }
+    ]
+  },
+  {
+    "case": "TwintXY",
+    "exchanges": [
+      {
+        "prompt": "Wie viel Geld habe ich von PARKINGPAY via TWINT erhalten?",
+        "status": 200,
+        "response": {
+          "status": "success",
+          "message": "Tadaaa! Hier sind die Daten zu den ParkingPay-Zahlungen via TWINT aus der gesamten Kundenhistorie – ich habe fleißig in den Tiefen der Datenbank gestöbert und alles herausgekramt, was zu deiner Anfrage passt. Viel Spaß beim Durchstöbern! Falls noch mehr gewünscht ist: Einfach Bescheid geben. 😊",
+          "data": {
+            "total": 1282,
+            "limit": 100,
+            "offset": 0,
+            "rows": [
+              {
+                "id": 5,
+                "val_date": "2025-08-26",
+                "amount": 8.0,
+                "direction": 2,
+                "customer_name": "Meier, Max",
+                "account_name": "CH59 0078 1608 XXXX YYYY Z/CHF/Meier, Max/St. Gallen/Privatkonto",
+                "trx_type_name": "Kartentransaktion",
+                "acquirer_country_name": "Schweiz",
+                "text_creditor": "PARKINGPAY-TWINT, SCHLIEREN\n+41791234567\n26.08.2025 09:22\n",
+                "trx_type_short": "cardtrx",
+                "buchungs_art_name": "TWINT-Zahlung",
+                "text_debitor": "PARKINGPAY-TWINT, SCHLIEREN\n+41791234567\n26.08.2025 09:22\n"
+              },
+              {
+                "id": 9,
+                "val_date": "2025-08-22",
+                "amount": 5.0,
+                "direction": 2,
+                "customer_name": "Meier, Max",
+                "account_name": "CH59 0078 1608 XXXX YYYY Z/CHF/Meier, Max/St. Gallen/Privatkonto",
+                "trx_type_name": "Kartentransaktion",
+                "acquirer_country_name": "Schweiz",
+                "text_creditor": "PARKINGPAY-TWINT, SCHLIEREN\n+41791234567\n22.08.2025 07:31\n",
+                "trx_type_short": "cardtrx",
+                "buchungs_art_name": "TWINT-Zahlung",
+                "text_debitor": "PARKINGPAY-TWINT, SCHLIEREN\n+41791234567\n22.08.2025 07:31\n"
+              },
+              {
+                "id": 30,
+                "val_date": "2025-08-15",
+                "amount": 5.0,
+                "direction": 2,
+                "customer_name": "Meier, Max",
+                "account_name": "CH59 0078 1608 XXXX YYYY Z/CHF/Meier, Max/St. Gallen/Privatkonto",
+                "trx_type_name": "Kartentransaktion",
+                "acquirer_country_name": "Schweiz",
+                "text_creditor": "PARKINGPAY-TWINT, SCHLIEREN\n+41791234567\n15.08.2025 21:49\n",
+                "trx_type_short": "cardtrx",
+                "buchungs_art_name": "TWINT-Zahlung",
+                "text_debitor": "PARKINGPAY-TWINT, SCHLIEREN\n+41791234567\n15.08.2025 21:49\n"
+              },
+              {
+                "id": 127,
+                "val_date": "2025-08-06",
+                "amount": 3.3,
+                "direction": 2,
+                "customer_name": "Meier, Max",
+                "account_name": "CH59 0078 1608 XXXX YYYY Z/CHF/Meier, Max/St. Gallen/Privatkonto",
+                "trx_type_name": "Kartentransaktion",
+                "acquirer_country_name": "Schweiz",
+                "text_creditor": "PARKINGPAY-TWINT, SCHLIEREN\n+41791234567\n08.06.2025 14:21\n",
+                "trx_type_short": "cardtrx",
+                "buchungs_art_name": "TWINT-Zahlung",
+                "text_debitor": "PARKINGPAY-TWINT, SCHLIEREN\n+41791234567\n08.06.2025 14:21\n"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "case": "SavingsTips",
+    "exchanges": [
+      {
+        "prompt": "Welche Spartipps kannst du mir basierend auf meinen Ausgaben geben?",
+        "status": 200,
+        "response": {
+          "status": "clarification_required",
+          "message": "Magst du mir Zugriff auf deine Ausgabenkategorien geben oder möchtest du bestimmte Zeiträume analysieren?",
+          "data": {
+            "task_spec": {
+              "task_type": "insight",
+              "intent_summary": "Nutzerin wünscht Spartipps basierend auf ihren Ausgaben.",
+              "filters": {
+                "personalisierung": "Ausgabenspezifisch"
+              },
+              "timeframe": "aktuell",
+              "entities": [
+                "Spartipps",
+                "Ausgaben"
+              ],
+              "needs_clarification": true,
+              "clarification_question": "Magst du mir Zugriff auf deine Ausgabenkategorien geben oder möchtest du bestimmte Zeiträume analysieren?",
+              "raw": null
+            }
+          }
+        }
+      },
+      {
+        "prompt": "Fokussiere dich auf die letzten 3 Monate und gib mir Tipps zu Freizeit und Einkauf.",
+        "status": 200,
+        "response": {
+          "status": "success",
+          "message": "Mit herzlichem Augenzwinkern ein großes Lob: Aus den letzten drei Monaten lässt sich ein richtig cleveres Sparverhalten erkennen! Viele kleine, bewusste Ausgaben sorgen für ein gut gelauntes Kontostand und zeigen, dass du Freizeit und Einkauf bestens im Griff hast. Ein wenig Spürsinn bei Wochenaktionen und ein flotter Blick auf Sammelpunkte lassen dein Sparschwein förmlich tanzen. Und vergiss nicht – Spaß am Alltag und ein steter Blick auf die Ausgaben machen richtig Freude am Sparen! Weiter so, du kluger Alltagsheld.",
+          "data": {
+            "recommendation": "Charmant gespart – weiter so! Kleine, aber regelmäßige Käufe (z. B. Kantine, Migros oder Volg) zeigen: Mit cleveren Snacks und smarten Supermarkt-Besuchen werden Ausgaben im Freizeit- und Einkaufsbereich im Griff gehalten. Tipp mit Augenzwinkern: Wer beim nächsten Einkauf auf Wochenaktionen in Supermärkten setzt oder Sammelaktionen nutzt, gewinnt doppelt – volle Einkaufstasche und kräftiges Konto. Und für größere Anschaffungen, da lohnt sich Preisvergleichen online richtig – ein bisschen Geduld zahlt sich meist aus.",
+            "key_insights": "Viele kleine Beträge bei Verpflegung und Einkauf (1,5-3,1 CHF für Kaffee, Snacks, kleinere Einkäufe) – dies deutet auf bewussten, budgetschonenden Umgang im Alltag hin. Einzelne größere Ausgaben (z. B. Fahrradkauf, 734 CHF) sind klar die Ausnahme und zeigen einen gezielten Investitionswillen. Wiederkehrende Einkäufe bei Discountern sowie die Nutzung bargeldloser, mobiler Zahlungsmethoden (Twint, Karte) sorgen für Übersicht – und erleichtern das Sparen.",
+            "evidence": "Transaktionen der letzten 3 Monate zeigen zahlreiche Buchungen für kleine Beträge (Kantine Zürich, Migros, Volg, Fratelli), daneben einzelne größere Zahlungen (z. B. Radkauf bei Radsport Radial GmbH). Insgesamt behalten kleine, smarte Buchungen die Oberhand im Ausgabenbild und schaffen Transparenz.",
+            "caveats": "Immer den Überblick behalten: Viele kleine Beträge summieren sich auch! Regelmäßig Bilanz ziehen (monatlich) verhindert Überraschungen. Einzelne Großausgaben (Fahrrad, Überweisungen) sollten immer mit dem aktuellen Sparziel abgeglichen werden. Heikel ist es, bei Auslandsnutzung die Wechselkursgebühren nicht zu unterschätzen – darauf beim Einkauf genau achten."
+          }
+        }
+      }
+    ]
+  },
+  {
+    "case": "TransportBreakdown",
+    "exchanges": [
+      {
+        "prompt": "Wie viel gebe ich für Transport aus, aufgeschlüsselt nach Auto und ÖV?",
+        "status": 500,
+        "response": {
+          "error": "Assistant processing failed.",
+          "details": "Expecting value: line 1 column 1 (char 0)"
+        }
+      },
+      {
+        "prompt": "Bitte nutze die Kategorien 'Auto' und 'ÖV' für die Aufteilung.",
+        "status": 500,
+        "response": {
+          "error": "Assistant processing failed.",
+          "details": "Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4.1 in organization org-mOcdf97sgJknmQIWYzmkOL6Q on tokens per min (TPM): Limit 30000, Used 12176, Requested 18396. Please try again in 1.144s. Visit https://platform.openai.com/account/rate-limits to learn more.', 'type': 'tokens', 'param': None, 'code': 'rate_limit_exceeded'}}"
+        }
+      }
+    ]
+  },
+  {
+    "case": "Anomalies",
+    "exchanges": [
+      {
+        "prompt": "Gibt es ungewöhnliche oder auffällige Posten in meinen Ausgaben?",
+        "status": 200,
+        "response": {
+          "status": "success",
+          "message": "Hier ist deine Analyse – und wie es sich für ein neugieriges Orchester gehört, habe ich die Ausgaben nach auffälligen oder ungewöhnlichen Buchungen durchforstet! Im aktuellsten verfügbaren Zeitraum stechen besonders einige große Einzelbuchungen ins Auge, wie etwa 840 CHF bei TGKB DIESSENHOFEN, 734 CHF bei Radsport Radial GmbH und 1'500 CHF als Inland-Zahlungsauftrag. Auch vermehrte Kleinausgaben im Bereich Kantine Zürich mit vielen identischen TWINT-Zahlungen erregen Aufmerksamkeit. Buchungen ins Ausland, z.B. nach Italien und Kroatien, könnten ebenfalls als ungewöhnlich eingestuft werden. Insgesamt scheinen sowohl große Einzeltransaktionen als auch Muster von mehrfach ähnlichen Kleinbeträgen auf. Wenn du noch mehr Details möchtest, spiele ich dir gern die passenden Einzelposten vor!",
+          "data": {
+            "total": 1282,
+            "limit": 50,
+            "offset": 0,
+            "highlighted_rows": [
+              {
+                "id": 223,
+                "val_date": "2025-12-04",
+                "amount": 840.0,
+                "customer_name": "Meier, Max",
+                "text_creditor": "TGKB DIESSENHOFEN"
+              },
+              {
+                "id": 123,
+                "val_date": "2025-12-06",
+                "amount": 734.0,
+                "customer_name": "Meier, Max",
+                "text_creditor": "Radsport Radial GmbH"
+              },
+              {
+                "id": 73,
+                "val_date": "2025-10-07",
+                "amount": 1500.0,
+                "customer_name": "Meier, Max",
+                "text_creditor": "",
+                "buchungs_art_name": "Zahlungsauftrag Inland"
+              },
+              {
+                "id": 71,
+                "val_date": "2025-12-07",
+                "amount": 1.9,
+                "customer_name": "Meier, Max",
+                "text_creditor": "ASPIT DIREZ. USCITA",
+                "acquirer_country_name": "Italien"
+              },
+              {
+                "id": 72,
+                "val_date": "2025-12-07",
+                "amount": 2.5,
+                "customer_name": "Meier, Max",
+                "text_creditor": "ASPIT DIREZ.ENTRATA",
+                "acquirer_country_name": "Italien"
+              },
+              {
+                "id": 43,
+                "val_date": "2025-09-08",
+                "amount": 24.91,
+                "customer_name": "Meier, Max",
+                "text_creditor": "PLODINE SUPERMARKET",
+                "acquirer_country_name": "Kroatien"
+              }
+            ],
+            "recurring_pattern": {
+              "text_creditor_contains": "KANTINE, ZÜRICH",
+              "count": 10,
+              "typical_amount": 1.5,
+              "note": "Mehrfach identische Kleinausgaben mit TWINT in der Kantine Zürich erkannt"
+            }
+          }
+        }
+      },
+      {
+        "prompt": "Schau dir dazu den Zeitraum Juni bis August 2025 an.",
+        "status": 500,
+        "response": {
+          "error": "Assistant processing failed.",
+          "details": "Expecting ',' delimiter: line 79 column 7 (char 3790)"
+        }
+      }
+    ]
+  },
+  {
+    "case": "SuggestCategory",
+    "exchanges": [
+      {
+        "prompt": "Kannst du mir eine neue Kategorie vorschlagen?",
+        "status": 200,
+        "response": {
+          "status": "clarification_required",
+          "message": "Für welchen Bereich möchtest du eine neue Kategorie? Geht es um Ausgaben, Einnahmen oder etwas anderes?",
+          "data": {
+            "task_spec": {
+              "task_type": "clarification",
+              "intent_summary": "Nutzerin wünscht Vorschlag für eine neue Kategorie",
+              "filters": {},
+              "timeframe": null,
+              "entities": [],
+              "needs_clarification": true,
+              "clarification_question": "Für welchen Bereich möchtest du eine neue Kategorie? Geht es um Ausgaben, Einnahmen oder etwas anderes?",
+              "raw": null
+            }
+          }
+        }
+      },
+      {
+        "prompt": "Ich brauche eine Kategorie für meine Sport- und Fitness-Ausgaben.",
+        "status": 200,
+        "response": {
+          "status": "success",
+          "message": "Tada! Hier kommt dein maßgeschneiderter Vorschlag: Für deine Sport- und Fitness-Ausgaben bietet sich eine eigene Kategorie wie „Sport & Fitness“ optimal an. Damit findest du immer sofort heraus, wo du investierst – und verpassen wird dir kein Gym-Besuch oder Yogakurs mehr! Mit Unterkategorien kannst du sogar noch genauer unterscheiden, ob das neue Springseil oder der Laufkurs dahintersteckt. Klingt das motivierend?",
+          "data": {
+            "recommendation": "Erstelle für deine Sport- und Fitness-Ausgaben am besten eine eigene Kategorie wie zum Beispiel „Sport & Fitness“. Unterkategorien könnten nützlich sein – etwa für Fitnessstudio, Sportvereine, Ausrüstung oder Event-Teilnahmen. So hast du stets den perfekten Überblick und entdeckst vielleicht sogar, ob du eher der Geräte-Hamster oder der Kurs-Junkie bist 😉.",
+            "key_insights": "Sport- und Fitness-Ausgaben tauchen häufig als TWINT-Zahlung, Kartenbezug oder als Zahlungsauftrag in Berichten auf, meist ohne genauere Kategorien. Eine eigene Kategorie erleichtert dir das präzise Nachverfolgen und das Setzen von Spar- oder Investitionszielen für deine Gesundheit.",
+            "evidence": "Aus den vorhandenen Daten zu Ausgaben (TWINT-Zahlung, Kartenbezug, etc.) gibt es keine standardisierte Zuordnung zur Kategorie ‚Sport & Fitness‘. Die klassische Buchungsart zeigt eher das Zahlungsmittel als den Verwendungszweck.",
+            "caveats": "Automatische Klassifizierung nach Verwendungszweck ist oft schwierig, da Buchungstexte (z. B. TWINT-Zahlung) selten Details zur Sport- oder Fitnessnutzung liefern. Am besten ordnest du die Ausgaben gelegentlich selbst zu, um keine Yoga-Session oder Lauf-App zu übersehen!"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "case": "ExportCSV",
+    "exchanges": [
+      {
+        "prompt": "Kann ich die Daten als CSV exportieren?",
+        "status": 200,
+        "response": {
+          "status": "clarification_required",
+          "message": "Welche Daten möchtest du genau als CSV exportieren?",
+          "data": {
+            "task_spec": {
+              "task_type": "clarification",
+              "intent_summary": "Nutzerin möchte Daten im CSV-Format exportieren.",
+              "filters": {},
+              "timeframe": null,
+              "entities": [],
+              "needs_clarification": true,
+              "clarification_question": "Welche Daten möchtest du genau als CSV exportieren?",
+              "raw": null
+            }
+          }
+        }
+      },
+      {
+        "prompt": "Exportiere bitte meine Transaktionen der letzten 30 Tage.",
+        "status": 500,
+        "response": {
+          "error": "Assistant processing failed.",
+          "details": "Expecting ',' delimiter: line 38 column 7 (char 1594)"
+        }
+      }
+    ]
+  }
+]
