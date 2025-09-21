@@ -142,7 +142,7 @@ export default function PieChart({
         <span>Category</span>
         <span>Amount / Share</span>
       </p>
-      <div className={cn("mt-2", listWrapperClassName)}>
+      <div className={cn("mt-2 no-scrollbar", listWrapperClassName)}>
         <List className={cn("mt-2", listClassName)}>
           {expenseCategories.map((item) => (
             <ListItem key={item.name} className="items-start gap-4">
