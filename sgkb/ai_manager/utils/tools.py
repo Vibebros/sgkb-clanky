@@ -7,6 +7,10 @@ from asgiref.sync import sync_to_async
 from decimal import Decimal
 from finance.models import BankTransaction, Partners, Recommendation
 from datetime import date, timedelta
+import calendar
+from django.db.models import Sum
+
+from ai_manager.models import Preference
 
 
 @function_tool
@@ -32,6 +36,7 @@ async def get_transactions(
     cred_addr_text: str | None = None,
     cred_ref_nr: str | None = None,
     cred_info: str | None = None,
+    category: str | None = None
 ) -> list[dict]:
     """Fetch filtered bank transactions."""
 
@@ -59,6 +64,7 @@ async def get_transactions(
             cred_addr_text=cred_addr_text,
             cred_ref_nr=cred_ref_nr,
             cred_info=cred_info,
+            category=category
         )
 
         return list(
@@ -217,4 +223,102 @@ async def create_recommendation(
             description=description or f"Suggested link: {partner.name} ↔ TX#{tx.id} ({tx.amount} on {tx.val_date})."
         )
         return {"id": rec.id, "name": rec.name, "description": rec.description}
+    return await asyncio.to_thread(run_query)
+
+
+
+PRODUCT_TYPES = [
+    "Säule 3A",
+    "ETF - MSCI World",
+    "AKTIE Risiko",
+    "Edelmetalle",
+]
+
+@function_tool
+async def get_monthly_balance(ctx: RunContextWrapper, year: int, month: int) -> dict:
+    """Calculate inflow, outflow and net balance for a given month."""
+    def run_query():
+        first_day = date(year, month, 1)
+        last_day = date(year, month, calendar.monthrange(year, month)[1])
+
+        inflow = (
+            BankTransaction.objects.filter(direction=1, val_date__range=(first_day, last_day))
+            .aggregate(total=Sum("amount"))["total"] or 0
+        )
+        outflow = (
+            BankTransaction.objects.filter(direction=2, val_date__range=(first_day, last_day))
+            .aggregate(total=Sum("amount"))["total"] or 0
+        )
+
+        balance = inflow - outflow
+        return {
+            "year": year,
+            "month": month,
+            "inflow": float(inflow),
+            "outflow": float(outflow),
+            "balance": float(balance),
+        }
+
+    return await asyncio.to_thread(run_query)
+
+
+@function_tool
+async def recommend_investment_package(ctx: RunContextWrapper, balance: float) -> str:
+    """
+    Recommend an investment product package based on leftover balance.
+    - Säule 3A: if balance < 500
+    - ETF - MSCI World: if 500 <= balance < 2000
+    - AKTIE Risiko: if 2000 <= balance < 5000
+    - Edelmetalle: if balance >= 5000
+    """
+    if balance < 500:
+        return PRODUCT_TYPES[0]  # Säule 3A
+    elif balance < 2000:
+        return PRODUCT_TYPES[1]  # ETF - MSCI World
+    elif balance < 5000:
+        return PRODUCT_TYPES[2]  # AKTIE Risiko
+    else:
+        return PRODUCT_TYPES[3]  # Edelmetalle
+
+
+
+@function_tool
+async def get_preferences(
+    ctx: RunContextWrapper,
+    min_score: float = -1.0,
+    max_score: float = 1.0,
+) -> dict:
+    """
+    Fetch global preferences (likes and dislikes).
+    Score > 0 = like, Score < 0 = dislike.
+
+    Args:
+        min_score: Minimum score filter (default -1.0, includes dislikes).
+        max_score: Maximum score filter (default 1.0).
+
+    Returns:
+        dict with 'likes' and 'dislikes'
+    """
+
+    def run_query():
+        qs = Preference.objects.filter(score__gte=min_score, score__lte=max_score)
+
+        likes = []
+        dislikes = []
+
+        for pref in qs:
+            entry = {
+                "id": pref.id,
+                "type": pref.type,
+                "name": pref.name,
+                "category": pref.category.name if pref.category else None,
+                "score": pref.score,
+            }
+            if pref.score >= 0:
+                likes.append(entry)
+            else:
+                dislikes.append(entry)
+
+        return {"likes": likes, "dislikes": dislikes}
+
     return await asyncio.to_thread(run_query)

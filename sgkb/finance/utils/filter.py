@@ -22,7 +22,10 @@ class TransactionFilter:
         cred_addr_text=None,
         cred_ref_nr=None,
         cred_info=None,
+        category=None,
     ):
+        if category:
+            queryset = queryset.filter(category=category)
         # Dates
         if start_date:
             queryset = queryset.filter(val_date__gte=start_date)
