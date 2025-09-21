@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 interface BankTransaction {
   accountName: string
@@ -8,12 +8,35 @@ interface BankTransaction {
   amount: string
   valDate: string
   direction: string
+  logoUrl: string | null
+  logoName: string | null
+}
+
+interface GraphQLLogo {
+  url?: string | null
+  name?: string | null
+}
+
+interface GraphQLBankTransaction {
+  accountName?: string | null
+  textCreditor?: string | null
+  amount?: string | number | null
+  valDate?: string | null
+  direction?: string | number | null
+  logo?: GraphQLLogo | null
 }
 
 interface GraphQLResponse {
-  data: {
-    bankTransactions: BankTransaction[]
+  data?: {
+    bankTransactions: GraphQLBankTransaction[]
   }
+}
+
+const getInitials = (value: string) => {
+  const trimmed = value.trim()
+  if (!trimmed) return '?'
+  const parts = trimmed.split(/\s+/).slice(0, 2)
+  return parts.map((part) => part.charAt(0)).join('').toUpperCase() || '?'
 }
 
 export default function TransactionsPage() {
@@ -38,6 +61,10 @@ export default function TransactionsPage() {
                   amount
                   valDate
                   direction
+                  logo {
+                    url
+                    name
+                  }
                 }
               }
             `
@@ -48,18 +75,37 @@ export default function TransactionsPage() {
           throw new Error('Failed to fetch transactions')
         }
 
-        const data: GraphQLResponse = await response.json()
-        
-        // Filter transactions to only include those with complete data
-        const completeTransactions = data.data.bankTransactions.filter(transaction => 
-          transaction.accountName && 
-          transaction.textCreditor && 
-          transaction.amount && 
-          transaction.valDate &&
-          transaction.direction
-        )
-        
-        setTransactions(completeTransactions)
+        const payload: GraphQLResponse = await response.json()
+
+        const mappedTransactions: BankTransaction[] = (payload.data?.bankTransactions ?? [])
+          .map((transaction) => {
+            const direction = transaction.direction
+            const amount = transaction.amount
+
+            return {
+              accountName: transaction.accountName?.trim() ?? '',
+              textCreditor: transaction.textCreditor?.trim() ?? '',
+              amount:
+                typeof amount === 'number'
+                  ? amount.toString()
+                  : (amount ?? ''),
+              valDate: transaction.valDate ?? '',
+              direction: direction !== undefined && direction !== null
+                ? String(direction)
+                : '',
+              logoUrl: transaction.logo?.url ?? null,
+              logoName: transaction.logo?.name ?? null,
+            }
+          })
+          .filter(transaction =>
+            transaction.accountName &&
+            transaction.textCreditor &&
+            transaction.amount &&
+            transaction.valDate &&
+            transaction.direction
+          )
+
+        setTransactions(mappedTransactions)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error')
       } finally {
@@ -84,7 +130,20 @@ export default function TransactionsPage() {
           {transactions.map((transaction, index) => (
             <div key={index} className="border rounded-lg p-4 bg-white shadow-sm">
               <div className="flex justify-between items-start mb-2">
-                <div></div>
+                <div className="flex h-12 w-12 items-center justify-center rounded-full border border-gray-100 bg-gray-50">
+                  {transaction.logoUrl ? (
+                    <img
+                      src={transaction.logoUrl}
+                      alt={transaction.logoName ?? transaction.textCreditor}
+                      loading="lazy"
+                      className="h-10 w-10 object-contain"
+                    />
+                  ) : (
+                    <span className="text-sm font-semibold text-gray-500">
+                      {getInitials(transaction.textCreditor)}
+                    </span>
+                  )}
+                </div>
                 <span className={`px-2 py-1 rounded text-xs font-semibold ${transaction.direction === 'A_1' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                   {transaction.direction === 'A_1' ? 'Incoming' : 'Outgoing'}
                 </span>
