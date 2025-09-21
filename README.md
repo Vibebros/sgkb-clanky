@@ -9,6 +9,7 @@ A Django- and Next.js-based analytics playground for SGKB transaction data. The 
 - [Initial Setup](#initial-setup)
 - [Make Targets](#make-targets)
 - [Backend Workflow](#backend-workflow)
+- [CSV Data Import](#csv-data-import)
 - [Frontend Workflow](#frontend-workflow)
 - [Environment Variables](#environment-variables)
 - [Testing & Quality](#testing--quality)
@@ -96,6 +97,28 @@ docker stop redis && docker rm redis
 
 Celery enrichment tasks (e.g., `enrich_transaction_logos`) rely on the `LOGO_DEV_API_KEY` and will progressively enrich transactions with logo metadata.
 
+## CSV Data Import
+Manually importing transaction exports is handled through the Django admin so that business users can refresh datasets without touching the codebase.
+
+1. Ensure the backend is running (`make server`) and you are authenticated at `http://localhost:8000/admin/`.
+2. Open <http://127.0.0.1:8000/admin/finance/banktransaction/upload-csv/> to reach the direct upload form (also linked from the **Bank transactions** changelist).
+3. Upload the latest `categories.csv` export (UTF-8 encoded) and submit the form. The importer streams rows into `BankTransaction` records and will create `Catagory` entries on-the-fly if a `category` column is present.
+4. Watch the success banner in the admin for confirmation, or any error message with details about rejected rows.
+
+The parser accepts the SGKB export headers used in production (case-sensitive). Common columns include:
+```
+TRX_ID, TRX_TYPE_ID, TRX_TYPE_SHORT, TRX_TYPE_NAME,
+BUCHUNGS_ART_SHORT, BUCHUNGS_ART_NAME,
+VAL_DATE, TRX_DATE, DIRECTION, AMOUNT, TRX_CURRY_ID, TRX_CURRY_NAME,
+MONEY_ACCOUNT_NAME, MACC_TYPE, PRODUKT, KUNDEN_NAME,
+TEXT_SHORT_CREDITOR, TEXT_CREDITOR, TEXT_SHORT_DEBITOR, TEXT_DEBITOR,
+POINT_OF_SALE_AND_LOCATION, ACQUIRER_COUNTRY_ID, ACQUIRER_COUNTRY_NAME,
+CARD_ID, CRED_ACC_TEXT, CRED_IBAN, CRED_ADDR_TEXT, CRED_REF_NR, CRED_INFO,
+category
+```
+Values missing from the CSV default to blanks, and decimal values may use either dot or comma separators. After a successful import you can optionally run Celery enrichment (`make worker`) to attach company logos to the new transactions.
+
+
 ## Frontend Workflow
 1. Install dependencies (one-time):
    ```bash
@@ -124,6 +147,7 @@ Define variables in `.env` (loaded automatically by `sgkb/sgkb/settings.py`):
 Variables already present in the environment take precedence over `.env`.
 
 ## Testing & Quality
+- Backend tests: `cd sgkb && python manage.py test`
 - Lint/format frontend: `cd frontend && npm run lint`
 - Consider running Celery tasks in isolation for diagnostics:
   ```bash
