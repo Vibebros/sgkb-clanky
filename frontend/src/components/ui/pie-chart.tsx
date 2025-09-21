@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from 'react';
 import { Card, DonutChart, List, ListItem } from "@tremor/react";
 
 import { cn } from "@/lib/utils";
@@ -11,38 +12,16 @@ export interface ExpenseCategory {
   color: string;
 }
 
-export const expenseCategories: ExpenseCategory[] = [
-  {
-    name: "Travel",
-    amount: 6730,
-    share: "32.1%",
-    color: "bg-green-600",
-  },
-  {
-    name: "IT & equipment",
-    amount: 4120,
-    share: "19.6%",
-    color: "bg-green-500",
-  },
-  {
-    name: "Training & development",
-    amount: 3920,
-    share: "18.6%",
-    color: "bg-green-400",
-  },
-  {
-    name: "Office supplies",
-    amount: 3210,
-    share: "15.3%",
-    color: "bg-green-300",
-  },
-  {
-    name: "Communication",
-    amount: 3010,
-    share: "14.3%",
-    color: "bg-green-200",
-  },
-];
+const TOTAL_CATEGORY_QUERY = `
+  query totalCategory {
+    totalsByCategory {
+      category
+      total
+    }
+  }
+`;
+
+const colors = ["bg-green-600", "bg-green-500", "bg-green-400", "bg-green-300", "bg-green-200", "bg-green-100"];
 
 export const currencyFormatter = (value: number) => {
   return `CHF ${Intl.NumberFormat("us").format(value)}`;
@@ -71,6 +50,60 @@ export default function PieChart({
   listWrapperClassName,
   listClassName,
 }: PieChartProps = {}) {
+  const [expenseCategories, setExpenseCategories] = useState<ExpenseCategory[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCategoryData = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:8000/graphql/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            query: TOTAL_CATEGORY_QUERY,
+          }),
+        });
+        
+        const result = await response.json();
+        
+        if (result.data?.totalsByCategory) {
+          const totalSum = result.data.totalsByCategory.reduce((sum: number, item: any) => sum + parseFloat(item.total), 0);
+          
+          const transformedData = result.data.totalsByCategory.map((item: any, index: number) => {
+            const amount = parseFloat(item.total);
+            const share = ((amount / totalSum) * 100).toFixed(1) + '%';
+            return {
+              name: item.category,
+              amount: amount,
+              share: share,
+              color: colors[index % colors.length],
+            };
+          });
+          setExpenseCategories(transformedData);
+        }
+      } catch (error) {
+        console.error('Error fetching category data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategoryData();
+  }, []);
+
+  if (loading) {
+    return (
+      <Card className={cn("w-full sm:max-w-lg sm:mx-auto", cardClassName)}>
+        <div className="animate-pulse">
+          <div className="h-4 bg-gray-300 rounded w-3/4 mb-4"></div>
+          <div className="h-80 bg-gray-300 rounded"></div>
+        </div>
+      </Card>
+    );
+  }
+
   return (
     <Card className={cn("w-full sm:max-w-lg sm:mx-auto", cardClassName)}>
       <h3
