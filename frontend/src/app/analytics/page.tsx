@@ -56,6 +56,36 @@ const formatDate = (date: string) =>
     year: "numeric",
   });
 
+const normalizeDirection = (
+  value: GraphQLTransaction["direction"],
+): number => {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+
+    const numericSegment = trimmed.match(/\d+/);
+    if (numericSegment) {
+      const parsed = Number.parseInt(numericSegment[0], 10);
+      if (parsed === 1 || parsed === 2) {
+        return parsed;
+      }
+    }
+
+    const lowered = trimmed.toLowerCase();
+    if (lowered.includes("inflow")) {
+      return 1;
+    }
+    if (lowered.includes("outflow")) {
+      return 2;
+    }
+  }
+
+  return 0;
+};
+
 type GraphQLMonthlyTotal = {
   month?: string | null;
   total?: number | string | null;
@@ -158,9 +188,7 @@ export default function AnalyticsPage() {
                 : parseFloat(item?.amount ?? "0"),
             valDate: item?.valDate ?? "",
             direction:
-              typeof item?.direction === "number"
-                ? item.direction
-                : Number(item?.direction ?? 0),
+              normalizeDirection(item?.direction),
           }))
           .filter((item) => item.valDate && Number.isFinite(item.amount));
 
