@@ -120,7 +120,7 @@ export default function SGKBPlusPage() {
                 SGKB+
               </div>
               <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">
-                SKGB+ balance
+                SGKB+ balance
               </h1>
               <p className="mt-2 max-w-md text-sm text-white/80">
                 Turn your everyday spending into curated upgrades, immersive experiences,
