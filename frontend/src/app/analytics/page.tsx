@@ -71,6 +71,12 @@ type GraphQLTransaction = {
   direction?: number | string | null;
 };
 
+const SAVINGS_ASSUMPTION = {
+  monthlyContribution: 850,
+  months: 6,
+  expectedBonus: 1200,
+};
+
 export default function AnalyticsPage() {
   const [monthlyTotals, setMonthlyTotals] = useState<MonthlyTotal[]>([]);
   const [recentTransactions, setRecentTransactions] = useState<
@@ -78,6 +84,12 @@ export default function AnalyticsPage() {
   >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeRecommendationIndex, setActiveRecommendationIndex] =
+    useState(0);
+  const [allocationStatus, setAllocationStatus] = useState<
+    { tone: "success" | "error"; message: string } | null
+  >(null);
+  const [customAmount, setCustomAmount] = useState("");
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -228,6 +240,142 @@ export default function AnalyticsPage() {
     );
   }, [recentTransactions]);
 
+  const savedAmount = useMemo(() => {
+    const recurring =
+      SAVINGS_ASSUMPTION.monthlyContribution * SAVINGS_ASSUMPTION.months;
+    return recurring + SAVINGS_ASSUMPTION.expectedBonus;
+  }, []);
+
+  const assumptionSummary = useMemo(
+    () =>
+      `${formatCurrency(SAVINGS_ASSUMPTION.monthlyContribution)} monthly · ${SAVINGS_ASSUMPTION.months} months · ${formatCurrency(SAVINGS_ASSUMPTION.expectedBonus)} bonus`,
+    [],
+  );
+
+  const recommendedProducts = useMemo(() => {
+    const base = [
+      {
+        name: "Säule 3a",
+        allocation: 0.35,
+        description:
+          "Tax-advantaged retirement pillar to lock in long-term savings.",
+      },
+      {
+        name: "Aktien",
+        allocation: 0.2,
+        description:
+          "Diversified stock basket to keep the growth component of your plan.",
+      },
+      {
+        name: "ETF",
+        allocation: 0.2,
+        description:
+          "Broad-market ETF exposure with low fees and daily liquidity.",
+      },
+      {
+        name: "Edelmetalle",
+        allocation: 0.15,
+        description:
+          "Add precious metals as a hedge against inflation and volatility.",
+      },
+      {
+        name: "Bitcoin",
+        allocation: 0.1,
+        description:
+          "Small digital asset position to participate in alternative markets.",
+      },
+    ];
+
+    if (!savedAmount) {
+      return base.map((item) => ({
+        ...item,
+        suggestedAmount: 0,
+      }));
+    }
+
+    return base.map((item) => ({
+      ...item,
+      suggestedAmount: savedAmount * item.allocation,
+    }));
+  }, [savedAmount]);
+
+  useEffect(() => {
+    if (!recommendedProducts.length) {
+      setActiveRecommendationIndex(0);
+      return;
+    }
+
+    setActiveRecommendationIndex((prev) =>
+      Math.min(prev, recommendedProducts.length - 1),
+    );
+  }, [recommendedProducts]);
+
+  const currentRecommendation =
+    recommendedProducts[activeRecommendationIndex] ?? recommendedProducts[0];
+
+  useEffect(() => {
+    setAllocationStatus(null);
+    setCustomAmount("");
+  }, [activeRecommendationIndex]);
+
+  const handlePrevRecommendation = () => {
+    if (recommendedProducts.length <= 1) return;
+    setActiveRecommendationIndex((prev) =>
+      prev === 0 ? recommendedProducts.length - 1 : prev - 1,
+    );
+  };
+
+  const handleNextRecommendation = () => {
+    if (recommendedProducts.length <= 1) return;
+    setActiveRecommendationIndex((prev) =>
+      (prev + 1) % recommendedProducts.length,
+    );
+  };
+
+  const handleSelectRecommendation = (index: number) => {
+    if (index === activeRecommendationIndex) return;
+    setActiveRecommendationIndex(index);
+  };
+
+  const handleAllocate = (amount: number, label: string) => {
+    if (!currentRecommendation || amount <= 0) return;
+
+    setAllocationStatus({
+      tone: "success",
+      message: `${label}: earmarked ${formatCurrency(amount)} for ${currentRecommendation.name}. Investment booking will open once the API is ready.`,
+    });
+  };
+
+  const handleAllocateSuggested = () => {
+    if (!currentRecommendation || currentRecommendation.suggestedAmount <= 0) {
+      return;
+    }
+    handleAllocate(currentRecommendation.suggestedAmount, "AI suggestion");
+  };
+
+  const handleAllocateRatio = (ratio: number, label: string) => {
+    if (savedAmount <= 0) return;
+    handleAllocate(savedAmount * ratio, label);
+  };
+
+  const handleAllocateHalf = () => handleAllocateRatio(0.5, "50% buffer");
+
+  const handleAllocateFull = () => handleAllocateRatio(1, "Full buffer");
+
+  const handleAllocateCustom = () => {
+    const amount = Number.parseFloat(customAmount);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setAllocationStatus({
+        tone: "error",
+        message: "Enter a positive amount to allocate.",
+      });
+      return;
+    }
+
+    handleAllocate(amount, "Custom amount");
+    setCustomAmount("");
+  };
+
   const topMerchants = useMemo(() => {
     const totals = new Map<string, number>();
 
@@ -316,6 +464,147 @@ export default function AnalyticsPage() {
               <p className="mt-1 text-xs text-gray-500">
                 {bestMonth ? formatMonthLabel(bestMonth.month) : "No data"}
               </p>
+            </div>
+            <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm flex flex-col">
+              <p className="text-sm text-gray-500">AI savings ideas</p>
+              <p className="mt-2 text-2xl font-semibold text-gray-900">
+                {savedAmount > 0 ? formatCurrency(savedAmount) : "—"}
+              </p>
+              <p className="mt-1 text-xs text-gray-500">
+                {savedAmount > 0
+                  ? "Projected reinvestable budget (simulated)"
+                  : "Build a positive net flow to unlock tailored offers"}
+              </p>
+              <p className="mt-1 text-xs text-gray-400">
+                {`Assumption: ${assumptionSummary}`}
+              </p>
+              {recommendedProducts.length > 1 && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {recommendedProducts.map((product, index) => {
+                    const isActive = index === activeRecommendationIndex;
+                    return (
+                      <button
+                        key={product.name}
+                        type="button"
+                        onClick={() => handleSelectRecommendation(index)}
+                        className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                          isActive
+                            ? "border-green-600 bg-green-50 text-green-700"
+                            : "border-gray-200 text-gray-600 hover:border-gray-300 hover:text-gray-900"
+                        }`}
+                      >
+                        {product.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={handleAllocateSuggested}
+                  className="rounded border border-gray-200 px-3 py-1 text-xs font-medium text-gray-600 hover:border-gray-300 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={
+                    !currentRecommendation ||
+                    currentRecommendation.suggestedAmount <= 0
+                  }
+                >
+                  Use AI suggestion
+                </button>
+                <button
+                  type="button"
+                  onClick={handleAllocateHalf}
+                  className="rounded border border-gray-200 px-3 py-1 text-xs font-medium text-gray-600 hover:border-gray-300 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={savedAmount <= 0}
+                >
+                  Allocate 50%
+                </button>
+                <button
+                  type="button"
+                  onClick={handleAllocateFull}
+                  className="rounded border border-gray-200 px-3 py-1 text-xs font-medium text-gray-600 hover:border-gray-300 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={savedAmount <= 0}
+                >
+                  Allocate 100%
+                </button>
+              </div>
+              <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
+                <div className="flex flex-1 items-center gap-2">
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    min="0"
+                    step="50"
+                    placeholder="Custom amount (CHF)"
+                    className="w-full rounded border border-gray-200 px-3 py-1 text-xs text-gray-700 focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600"
+                    value={customAmount}
+                    onChange={(event) => setCustomAmount(event.target.value)}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAllocateCustom}
+                  className="rounded border border-gray-200 px-3 py-1 text-xs font-medium text-gray-600 hover:border-gray-300 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={!customAmount.trim() || !currentRecommendation}
+                >
+                  Allocate custom
+                </button>
+              </div>
+              <div className="mt-4 flex items-center justify-between">
+                <span className="text-xs font-medium text-gray-500">
+                  {recommendedProducts.length
+                    ? `${activeRecommendationIndex + 1} / ${recommendedProducts.length}`
+                    : "0 / 0"}
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handlePrevRecommendation}
+                    className="rounded border border-gray-200 px-3 py-1 text-xs font-medium text-gray-600 hover:border-gray-300 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={recommendedProducts.length <= 1}
+                  >
+                    Prev
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleNextRecommendation}
+                    className="rounded border border-gray-200 px-3 py-1 text-xs font-medium text-gray-600 hover:border-gray-300 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={recommendedProducts.length <= 1}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+              {currentRecommendation && (
+                <div className="mt-4 rounded-lg border border-gray-100 bg-gray-50 p-4">
+                  <h4 className="text-base font-semibold text-gray-900">
+                    {currentRecommendation.name}
+                  </h4>
+                  <p className="mt-1 text-sm text-gray-600">
+                    {currentRecommendation.description}
+                  </p>
+                  {currentRecommendation.suggestedAmount > 0 ? (
+                    <p className="mt-3 text-sm font-medium text-gray-900">
+                      Allocate {formatCurrency(currentRecommendation.suggestedAmount)}
+                    </p>
+                  ) : (
+                    <p className="mt-3 text-xs text-gray-500">
+                      The AI agent will personalise allocations once more savings are detected.
+                    </p>
+                  )}
+                </div>
+              )}
+              {allocationStatus && (
+                <p
+                  className={`mt-3 text-xs font-medium ${
+                    allocationStatus.tone === "success"
+                      ? "text-green-700"
+                      : "text-red-600"
+                  }`}
+                >
+                  {allocationStatus.message}
+                </p>
+              )}
             </div>
           </section>
 
