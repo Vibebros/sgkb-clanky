@@ -1,6 +1,7 @@
 "use client";
 import { Card, List, ListItem } from "@tremor/react";
 import { type TouchEvent, useEffect, useMemo, useRef, useState } from "react";
+import { PageHeader } from "@/components/ui/page-header";
 import PieChart from "@/components/ui/pie-chart";
 import StatsCard from "@/components/ui/stats-card";
 import WorldMap from "@/components/ui/world-map";
@@ -131,14 +132,17 @@ export default function Home() {
 
   return (
     <div className="flex flex-col items-center min-h-screen pt-8 pb-16">
-      <div className="text-2xl font-bold text-gray-900 text-left w-full px-6 sm:px-12 pb-3">
-        Welcome back, John!
-      </div>
       <div className="w-full max-w-6xl px-4">
+        <PageHeader
+          title="SGKB Portal"
+          subtitle="Welcome back, John! Monitor your finances and explore the latest insights."
+        />
+      </div>
+      <div className="w-full max-w-6xl px-4 mt-6">
         <StatsCard />
       </div>
-      <div className="w-full max-w-3xl px-4 mt-8">
-        <Card className="overflow-hidden rounded-3xl border border-gray-100 bg-white/80 shadow-lg backdrop-blur-sm">
+      <div className="w-full max-w-6xl px-4 mt-8">
+        <Card className="w-full overflow-hidden rounded-3xl border border-gray-100 bg-white/80 shadow-lg backdrop-blur-sm">
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-4 px-6 pt-6">
               <div className="flex items-center justify-between">

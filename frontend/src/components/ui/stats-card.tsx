@@ -100,7 +100,7 @@ export default function StatsCard() {
     : data.length > 0 ? currencyFormatter(data[0].revenue) : currencyFormatter(0);
 
   return (
-      <Card className="sm:mx-auto sm:max-w-lg">
+      <Card className="w-full">
         <p className="text-tremor-default text-tremor-content dark:text-dark-tremor-content text-xl">
           Expenses by month
         </p>

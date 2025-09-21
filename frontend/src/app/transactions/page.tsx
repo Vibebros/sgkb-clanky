@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { PageHeader } from '@/components/ui/page-header'
 
 interface BankTransaction {
   accountName: string
@@ -116,14 +117,18 @@ export default function TransactionsPage() {
     fetchTransactions()
   }, [])
 
-  if (loading) return <div className="p-6">Loading transactions...</div>
-  if (error) return <div className="p-6 text-red-600">Error: {error}</div>
-
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Bank Transactions</h1>
-      
-      {transactions.length === 0 ? (
+    <div className="space-y-6 p-6">
+      <PageHeader
+        title="SGKB Portal"
+        subtitle="Review your recent bank transactions and their key details."
+      />
+
+      {loading ? (
+        <p className="text-gray-600">Loading transactions...</p>
+      ) : error ? (
+        <p className="text-red-600">Error: {error}</p>
+      ) : transactions.length === 0 ? (
         <p className="text-gray-500">No complete transactions found.</p>
       ) : (
         <div className="grid gap-4">
@@ -153,18 +158,18 @@ export default function TransactionsPage() {
                   <span className="font-semibold text-gray-700">Account:</span>
                   <p className="text-sm text-gray-600">{transaction.accountName}</p>
                 </div>
-                
+
                 <div>
                   <span className="font-semibold text-gray-700">Creditor:</span>
                   <p className="text-sm text-gray-600 whitespace-pre-line">{transaction.textCreditor}</p>
                 </div>
-                
+
                 <div className="flex justify-between items-center">
                   <div>
                     <span className="font-semibold text-gray-700">Amount:</span>
                     <span className="ml-2 text-lg font-bold text-gray-900">CHF {Math.abs(parseFloat(transaction.amount))}</span>
                   </div>
-                  
+
                   <div>
                     <span className="font-semibold text-gray-700">Date:</span>
                     <span className="ml-2 text-gray-600">{transaction.valDate}</span>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const metadata: Metadata = {
   title: "SGKB+ Loyalty",
@@ -110,6 +111,11 @@ export default function SGKBPlusPage() {
 
   return (
     <div className="px-6 py-8 pb-24 space-y-8">
+      <PageHeader
+        title="SGKB Portal"
+        subtitle="Explore SGKB+ loyalty perks, missions, and recent activity."
+      />
+
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-500 via-emerald-600 to-slate-900 text-white">
         <div className="absolute -left-10 top-6 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
         <div className="absolute bottom-0 right-0 h-40 w-40 translate-y-12 rounded-full bg-white/10 blur-3xl" />
@@ -119,9 +125,9 @@ export default function SGKBPlusPage() {
               <div className="text-sm uppercase tracking-[0.2em] text-white/70">
                 SGKB+
               </div>
-              <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">
+              <h2 className="mt-2 text-3xl font-semibold sm:text-4xl">
                 SGKB+ balance
-              </h1>
+              </h2>
               <p className="mt-2 max-w-md text-sm text-white/80">
                 Turn your everyday spending into curated upgrades, immersive experiences,
                 and climate-positive perks.

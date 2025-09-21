@@ -2,6 +2,7 @@
 
 import { AreaChart, Card } from "@tremor/react";
 import { useEffect, useMemo, useState } from "react";
+import { PageHeader } from "@/components/ui/page-header";
 
 type MonthlyTotal = {
   month: string;
@@ -425,13 +426,10 @@ export default function AnalyticsPage() {
 
   return (
     <div className="px-6 py-8 space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-900">Analytics</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          Track volume trends, inflow vs. outflow, and top merchants from your
-          recent activity.
-        </p>
-      </div>
+      <PageHeader
+        title="SGKB Portal"
+        subtitle="Track volume trends, inflow vs. outflow, and top merchants from your recent activity."
+      />
 
       {loading && <div className="text-gray-600">Loading analytics…</div>}
       {error && !loading && (
